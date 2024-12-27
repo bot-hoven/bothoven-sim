@@ -288,6 +288,15 @@ class ShadowHand(base.Hand):
 
             dof = _FOREARM_DOFS[dof_name]
 
+            ### me
+            """
+            Note that "root_body" here is defined by the root_body() function lower
+            in this file. It actually returns the body element for the "rh_forearm"
+            or "lh_forearm" (depending on what the prefix is) from the MJCF file.
+            Thus, by setting the joint under this forearm body, your give it a degree
+            of freedom relative to its parent, which in this case is just <worldbody>
+            """
+            ### me
             joint = self.root_body.add(
                 "joint",
                 type=dof.joint_type,

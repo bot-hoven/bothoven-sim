@@ -24,6 +24,12 @@ class StageTest(absltest.TestCase):
     def test_compiles_and_steps(self) -> None:
         arena = stage.Stage()
         physics = mjcf.Physics.from_mjcf_model(arena.mjcf_model)
+
+        ### me
+        with open('my_model.xml', 'w') as f:
+            f.write(arena._mjcf_root.to_xml_string())
+        ### me
+        
         physics.step()
 
 

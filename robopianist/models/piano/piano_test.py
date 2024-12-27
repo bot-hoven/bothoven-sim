@@ -25,6 +25,12 @@ class PianoTest(absltest.TestCase):
     def test_compiles_and_steps(self) -> None:
         robot = piano.Piano()
         physics = mjcf.Physics.from_mjcf_model(robot.mjcf_model)
+
+        ### me
+        with open('my_model.xml', 'w') as f:
+            f.write(robot.mjcf_model.to_xml_string())        
+        ### me
+
         for _ in range(100):
             physics.step()
 
