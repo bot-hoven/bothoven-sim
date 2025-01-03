@@ -31,7 +31,7 @@ from note_seq import NoteSequence, midi_io, midi_synth, music_pb2, sequences_lib
 from note_seq import constants as ns_constants
 
 from robopianist import SF2_PATH
-from robopianist.music import audio
+# from robopianist.music import audio
 from robopianist.music import constants as consts
 from robopianist.music.piano_roll import sequence_to_pianoroll
 
@@ -247,7 +247,7 @@ class MidiFile:
         waveform_float = self.synthesize()
         normalizer = float(np.iinfo(np.int16).max)
         waveform = np.array(np.asarray(waveform_float) * normalizer, dtype=np.int16)
-        audio.play_sound(waveform, sampling_rate=sampling_rate)
+        # audio.play_sound(waveform, sampling_rate=sampling_rate)
 
     def has_fingering(self) -> bool:
         """Returns whether the MIDI file has fingering information."""

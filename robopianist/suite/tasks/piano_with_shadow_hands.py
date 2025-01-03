@@ -425,8 +425,8 @@ class PianoWithShadowHands(base.PianoTask):
                 getattr(hand.observables, obs).enabled = True
 
         # This returns the current state of the piano keys.
-        self.piano.observables.state.enabled = True
-        self.piano.observables.sustain_state.enabled = True
+        self.piano.observables.state.enabled = False
+        self.piano.observables.sustain_state.enabled = False
 
         # This returns the goal state for the current timestep and n steps ahead.
         def _get_goal_state(physics) -> np.ndarray:

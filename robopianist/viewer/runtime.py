@@ -26,7 +26,7 @@ import numpy as np
 from dm_control.mujoco.wrapper import mjbindings
 
 from robopianist.models.piano import midi_module
-from robopianist.music import synthesizer
+# from robopianist.music import synthesizer
 from robopianist.viewer import util
 
 mjlib = mjbindings.mjlib
@@ -129,19 +129,19 @@ class Runtime:
         self._last_action = None
         self.on_physics_changed = util.QuietSet()
 
-        # Initialize the synthesizer.
-        self._synthesizer = synthesizer.Synthesizer()
-        self._synthesizer.start()
-        self._midi_module = environment.task.piano.midi_module
-        assert isinstance(self._midi_module, midi_module.MidiModule)
-        self._midi_module.register_synth_note_on_callback(self._synthesizer.note_on)
-        self._midi_module.register_synth_note_off_callback(self._synthesizer.note_off)
-        self._midi_module.register_synth_sustain_on_callback(
-            self._synthesizer.sustain_on
-        )
-        self._midi_module.register_synth_sustain_off_callback(
-            self._synthesizer.sustain_off
-        )
+        # # Initialize the synthesizer.
+        # self._synthesizer = synthesizer.Synthesizer()
+        # self._synthesizer.start()
+        # self._midi_module = environment.task.piano.midi_module
+        # assert isinstance(self._midi_module, midi_module.MidiModule)
+        # self._midi_module.register_synth_note_on_callback(self._synthesizer.note_on)
+        # self._midi_module.register_synth_note_off_callback(self._synthesizer.note_off)
+        # self._midi_module.register_synth_sustain_on_callback(
+        #     self._synthesizer.sustain_on
+        # )
+        # self._midi_module.register_synth_sustain_off_callback(
+        #     self._synthesizer.sustain_off
+        # )
 
     def tick(self, time_elapsed, paused, muted):
         """Advances the simulation by one frame.
@@ -165,7 +165,7 @@ class Runtime:
                 else:
                     self._state = State.STOPPED
             if self._state == State.RUNNING:
-                self._synthesizer.mute(muted)
+                # self._synthesizer.mute(muted)
                 finished = self._step_simulation(time_elapsed, paused)
                 if finished:
                     self._state = State.STOP
@@ -185,10 +185,10 @@ class Runtime:
                 while not finished and self.get_time() < end_time:
                     finished = self._step()
             self._tracked_simulation_time += step_duration
-        if paused or finished:
-            if self._synthesizer.sustained:
-                self._synthesizer.sustain_off()
-            self._synthesizer.all_notes_off()
+        # if paused or finished:
+        #     if self._synthesizer.sustained:
+        #         self._synthesizer.sustain_off()
+        #     self._synthesizer.all_notes_off()
         return finished
 
     def single_step(self):
@@ -250,7 +250,7 @@ class Runtime:
         old_data_ptr = self._environment.physics.data.ptr
 
         with self._error_logger:
-            self._synthesizer.all_sounds_off()
+            # self._synthesizer.all_sounds_off()
             self._time_step = self._environment.reset()
 
         if self._environment.physics.data.ptr is not old_data_ptr:
@@ -288,5 +288,5 @@ class Runtime:
     def environment(self):
         return self._environment
 
-    def __del__(self):
-        self._synthesizer.stop()
+    # def __del__(self):
+    #     self._synthesizer.stop()
