@@ -31,9 +31,9 @@ _PHYSICS_TIMESTEP = 0.005
 _CONTROL_TIMESTEP = 0.05  # 20 Hz.
 
 # Default position and orientation of the hands.
-_LEFT_HAND_POSITION = (0.4, -0.15, 0.13)
+_LEFT_HAND_POSITION = (0.375, -0.15, 0.1)
 _LEFT_HAND_QUATERNION = (-1, -1, 1, 1)
-_RIGHT_HAND_POSITION = (0.4, 0.15, 0.13)
+_RIGHT_HAND_POSITION = (0.375, 0.15, 0.1)
 _RIGHT_HAND_QUATERNION = (-1, -1, 1, 1)
 
 _ATTACHMENT_YAW = 0  # Degrees.
@@ -99,6 +99,7 @@ class PianoTask(PianoOnlyTask):
         gravity_compensation: bool = False,
         change_color_on_activation: bool = False,
         primitive_fingertip_collisions: bool = False,
+        bothoven_reduced_action_space: bool = False,
         reduced_action_space: bool = False,
         attachment_yaw: float = _ATTACHMENT_YAW,
         forearm_dofs: Sequence[str] = shadow_hand._DEFAULT_FOREARM_DOFS,
@@ -120,6 +121,7 @@ class PianoTask(PianoOnlyTask):
             gravity_compensation=gravity_compensation,
             primitive_fingertip_collisions=primitive_fingertip_collisions,
             reduced_action_space=reduced_action_space,
+            bothoven_reduced_action_space=bothoven_reduced_action_space,
             attachment_yaw=attachment_yaw,
             forearm_dofs=forearm_dofs,
         )
@@ -130,6 +132,7 @@ class PianoTask(PianoOnlyTask):
             gravity_compensation=gravity_compensation,
             primitive_fingertip_collisions=primitive_fingertip_collisions,
             reduced_action_space=reduced_action_space,
+            bothoven_reduced_action_space=bothoven_reduced_action_space,
             attachment_yaw=attachment_yaw,
             forearm_dofs=forearm_dofs,
         )
@@ -154,12 +157,16 @@ class PianoTask(PianoOnlyTask):
         gravity_compensation: bool,
         primitive_fingertip_collisions: bool,
         reduced_action_space: bool,
+        bothoven_reduced_action_space: bool,
         attachment_yaw: float,
         forearm_dofs: Sequence[str],
     ) -> shadow_hand.ShadowHand:
         joint_range = [-self._piano.size[1], self._piano.size[1]]
 
         # Offset the joint range by the hand's initial position.
+        # NOTE(me): This ensures that joint_range along the piano is
+        # specified relative to its initial position (centers the
+        # 0 point of the linear range at the start position).
         joint_range[0] -= position[1]
         joint_range[1] -= position[1]
 
@@ -168,6 +175,7 @@ class PianoTask(PianoOnlyTask):
             primitive_fingertip_collisions=primitive_fingertip_collisions,
             restrict_wrist_yaw_range=False,
             reduced_action_space=reduced_action_space,
+            bothoven_reduced_action_space=bothoven_reduced_action_space,
             forearm_dofs=forearm_dofs,
         )
         hand.root_body.pos = position

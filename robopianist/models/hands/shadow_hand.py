@@ -78,6 +78,34 @@ _REDUCED_ACTION_SPACE_EXCLUDED_DOFS: Tuple[str, ...] = (
 
 _REDUCED_THUMB_RANGE: Tuple[float, float] = (0.0, 0.698132)
 
+_BOTHOVEN_INCLUDED_ACTUATORS: Tuple[str, ...] = (
+    "A_THJ2",
+    "A_THJ4",
+    "A_FFJ3",
+    "A_FFJ4",
+    "A_MFJ3",
+    "A_MFJ4",
+    "A_RFJ3",
+    "A_RFJ4",
+    "A_LFJ3",
+    "A_LFJ4",
+)
+
+# XXJ1 and XXJ2 range that corresponds to A_XXJ0 (tendon) val of 1
+point_five_tup = (0.499, 0.501)
+
+_BOTHOVEN_FIXED_JOINTS: Dict[str, Tuple[float, float]] = {
+    "THJ3": (0.20844, 0.20944),
+    "FFJ1": point_five_tup,
+    "FFJ2": point_five_tup,
+    "MFJ1": point_five_tup,
+    "MFJ2": point_five_tup,
+    "RFJ1": point_five_tup,
+    "RFJ2": point_five_tup,
+    "LFJ1": point_five_tup,
+    "LFJ2": point_five_tup,
+}
+
 _FINGERTIP_OFFSET = 0.026
 _THUMBTIP_OFFSET = 0.0275
 
@@ -95,6 +123,7 @@ class ShadowHand(base.Hand):
         primitive_fingertip_collisions: bool = False,
         restrict_wrist_yaw_range: bool = False,
         reduced_action_space: bool = False,
+        bothoven_reduced_action_space: bool = False,
         forearm_dofs: Sequence[str] = _DEFAULT_FOREARM_DOFS,
     ) -> None:
         """Initializes a ShadowHand.
@@ -116,13 +145,14 @@ class ShadowHand(base.Hand):
         elif side == base.HandSide.LEFT:
             self._prefix = "lh_"
             xml_file = consts.LEFT_SHADOW_HAND_XML
-        name = name or self._prefix + "shadow_hand"
+        name = name or self._prefix + "shadow_hand" # e.g. rh_shadow_hand
 
         self._hand_side = side
         self._mjcf_root = mjcf.from_path(str(xml_file))
-        self._mjcf_root.model = name
+        self._mjcf_root.model = name # rename model to rh_shadow_hand or lh_shadow_hand
         self._n_forearm_dofs = 0
         self._reduce_action_space = reduced_action_space
+        self._bothoven_reduced_action_space = bothoven_reduced_action_space
         self._forearm_dofs = forearm_dofs
 
         if restrict_wrist_yaw_range:
@@ -136,10 +166,10 @@ class ShadowHand(base.Hand):
             actuator.ctrlrange = _RESTRICTED_WRJ2_RANGE
 
         # Important: call before parsing.
-        self._add_dofs()
+        self._add_dofs() # adds forearm joints and actuators
 
-        self._parse_mjcf_elements()
-        self._add_mjcf_elements()
+        self._parse_mjcf_elements() # gets joints / actuators into self._joints and self._actutators
+        self._add_mjcf_elements() # adds fingertip sites and touch/vel/torque/force sensors to MJCF
 
         if primitive_fingertip_collisions:
             for geom in self._mjcf_root.find_all("geom"):
@@ -159,6 +189,7 @@ class ShadowHand(base.Hand):
     def _parse_mjcf_elements(self) -> None:
         joints = mjcf_utils.safe_find_all(self._mjcf_root, "joint")
         actuators = mjcf_utils.safe_find_all(self._mjcf_root, "actuator")
+        tendons = mjcf_utils.safe_find_all(self._mjcf_root, "tendon")
         if self._reduce_action_space:
             # Disable some actuators.
             for act_name in _REDUCED_ACTION_SPACE_EXCLUDED_DOFS:
@@ -180,6 +211,41 @@ class ShadowHand(base.Hand):
             # Store indices of joints associated with disabled actuators.
             names = [self._prefix + n[2:] for n in _REDUCED_ACTION_SPACE_EXCLUDED_DOFS]
             self._disabled_idxs = [i for i, j in enumerate(joints) if j.name in names]
+        elif self._bothoven_reduced_action_space:
+            act_to_remove = [a for a in actuators if "forearm" not in a.name and a.name[3:] not in _BOTHOVEN_INCLUDED_ACTUATORS]
+            
+            # remove forearm_ty actuator
+            forearm_ty_act = [a for a in actuators if a.name == "forearm_ty"][0]
+            actuators.remove(forearm_ty_act)
+            forearm_ty_act.remove()
+            
+            # remove forearm_ty joint
+            ty_joint = [j for j in joints if j.name == "forearm_ty"][0]
+            joints.remove(ty_joint)
+            ty_joint.remove()
+            
+            # remove remaining unwanted actuators/joints
+            for act in act_to_remove:
+                joint_name = act.name[5:]
+                actuators.remove(act) # remove from actuators list
+                act.remove() # remove from MJCF
+                if joint_name not in _BOTHOVEN_FIXED_JOINTS and joint_name[-1] != "0":
+                    # remove joint altogether, effectively fusing it at its 0 value location
+                    jnt = [j for j in joints if j.name == self._prefix + joint_name][0]
+                    joints.remove(jnt)
+                    jnt.remove()
+            
+            # fix joints
+            jnts_to_fix = [j for j in joints if j.name[3:] in _BOTHOVEN_FIXED_JOINTS]
+            for jnt in jnts_to_fix:
+                jnt.range = _BOTHOVEN_FIXED_JOINTS[jnt.name[3:]]
+
+            # remove tendons
+            for tnd in tendons:
+                tnd.remove()
+
+            print("bothoven_reduced_action_space is True!")
+
         self._joints = tuple(joints)
         self._actuators = tuple(actuators)
 
@@ -189,6 +255,9 @@ class ShadowHand(base.Hand):
 
     def _add_mjcf_elements(self) -> None:
         # Add sites to the tips of the fingers.
+        # I believe the sites created here and stored in self._fingertip_sites are for
+        # spatial tracking of the fingertips, whereas fingertip sites created below for
+        # the touch sensors are separate because they need to be larger.
         fingertip_sites = []
         for tip_name in consts.FINGERTIP_BODIES:
             tip_elem = mjcf_utils.safe_find(
@@ -198,7 +267,7 @@ class ShadowHand(base.Hand):
             tip_site = tip_elem.add(
                 "site",
                 name=tip_name + "_site",
-                pos=(0.0, 0.0, offset),
+                pos=(0.0, 0.0, offset), # pos of site frame (i assume relative to fingertip body?)
                 type="sphere",
                 size=(0.004,),
                 group=composer.SENSOR_SITES_GROUP,
@@ -209,6 +278,8 @@ class ShadowHand(base.Hand):
         # Add joint torque sensors.
         joint_torque_sensors = []
         for joint_elem in self._joints:
+            # add site to body that each joint is attached to 
+            # joint_elem.parent gives the body that the joint is under
             site_elem = joint_elem.parent.add(
                 "site",
                 name=joint_elem.name + "_site",
@@ -217,6 +288,11 @@ class ShadowHand(base.Hand):
                 rgba=(0, 1, 0, 1),
                 group=composer.SENSOR_SITES_GROUP,
             )
+            # Add torque sensor for each joint to the root (mujoco tag) of the mjcf.
+            # Bind sensor to the site created above.
+            # Since the torque sensors are tied to sites attached to the bodies, I'm
+            # not sure what they actually measure (maybe the torques of the joint in a given
+            # body?).
             torque_sensor_elem = joint_elem.root.sensor.add(
                 "torque",
                 site=site_elem,
@@ -229,6 +305,7 @@ class ShadowHand(base.Hand):
         actuator_velocity_sensors = []
         actuator_force_sensors = []
         for actuator_elem in self._actuators:
+            # Add actuatorvel tags to the sensors section of the MJCF
             velocity_sensor_elem = self._mjcf_root.sensor.add(
                 "actuatorvel",
                 actuator=actuator_elem,
@@ -236,6 +313,7 @@ class ShadowHand(base.Hand):
             )
             actuator_velocity_sensors.append(velocity_sensor_elem)
 
+            # Add actuatorfrc tags to the sensors section of the MJCF
             force_sensor_elem = self._mjcf_root.sensor.add(
                 "actuatorfrc",
                 actuator=actuator_elem,
@@ -250,8 +328,10 @@ class ShadowHand(base.Hand):
         for tip_name in consts.FINGERTIP_BODIES:
             tip_elem = mjcf_utils.safe_find(
                 self._mjcf_root, "body", self._prefix + tip_name
-            )
+            ) # safe_find just means throw an error if not found
             offset = _THUMBTIP_OFFSET if tip_name == "thdistal" else _FINGERTIP_OFFSET
+            
+            # Add touch site to the fingertip body
             touch_site = tip_elem.add(
                 "site",
                 name=tip_name + "_touch_site",
@@ -261,6 +341,7 @@ class ShadowHand(base.Hand):
                 group=composer.SENSOR_SITES_GROUP,
                 rgba=(0, 1, 0, 0.6),
             )
+            # Add touch sensor to sensors section of MJCF (bound to site created above)
             touch_sensor = self._mjcf_root.sensor.add(
                 "touch",
                 site=touch_site,
