@@ -283,18 +283,40 @@ class PianoWithShadowHands(base.PianoTask):
         rew = 0.0
         # It's possible we have no keys to press at this timestep, so we need to check
         # that `on` is not empty.
+        actual = np.array(self.piano.state / self.piano._qpos_range[:, 1])
         if on.size > 0:
-            actual = np.array(self.piano.state / self.piano._qpos_range[:, 1])
+            # L2 distance for scalars is just difference
+            # Note that we only check the actual states for keys that are supposed
+            # to be on, i.e., those in `on`
             rews = tolerance(
-                self._goal_current[:-1][on] - actual[on],
+                self._goal_current[:-1][on] - actual[on], # this quantity >= 0
                 bounds=(0, _KEY_CLOSE_ENOUGH_TO_PRESSED),
                 margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10),
                 sigmoid="gaussian",
             )
-            rew += 0.5 * rews.mean()
-        # If there are any false positives, the remaining 0.5 reward is lost.
+            # rew += 0.5 * rews.mean()
+            rew += rews.mean()
+        
         off = np.flatnonzero(1 - self._goal_current[:-1])
-        rew += 0.5 * (1 - float(self.piano.activation[off].any()))
+        
+        # NOTE: This is my (not tried) modification. If all actual[off] are 0,
+        # false_pos_penalty == 0, and get remaining 0.6 reward. Otherwise, start
+        # scaling back the 0.6 in proportion to how much each incorrect key is pressed.
+        # false_pos_penalty = tolerance(
+        #     1.0 - actual[off], # if actual[off] within 0.05 of 1.0, tolerance() sets it to 1.0
+        #     bounds=(0, _KEY_CLOSE_ENOUGH_TO_PRESSED),
+        #     margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10), # start penalizing at 0.5 (half depression)
+        #     sigmoid="gaussian",
+        # )
+        # rew += 0.6 * (1 - (false_pos_penalty.sum() / 10))
+
+        # Remove 0.2 reward for every wrong key press. If all true positive keys are
+        # pressed at given timestep, rew from key proper key presses equals 1. Thus,
+        # if somehow also 10 FPs, will get reward -1 at that timestep.
+        rew -= 0.2 * float(np.sum(self.piano.activation[off]))
+
+        # If there are any false positives, the remaining 0.5 reward is lost.
+        # rew += 0.5 * (1 - float(self.piano.activation[off].any()))
         return rew
 
     def _compute_fingering_reward(self, physics: mjcf.Physics) -> float:
