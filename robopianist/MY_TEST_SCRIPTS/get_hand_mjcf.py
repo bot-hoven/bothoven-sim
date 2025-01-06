@@ -10,7 +10,7 @@ from robopianist.suite.tasks import base as base_task
 import numpy as np
 
 def get_env():
-    task = base_task.PianoTask(arena=stage.Stage(), bothoven_reduce_action_space=True)
+    task = base_task.PianoTask(arena=stage.Stage(), bothoven_reduced_action_space=True)
     env = composer.Environment(
         task=task, time_limit=5.0, strip_singleton_obs_buffer_dim=True
     )
@@ -38,27 +38,44 @@ count = 0
 prev_action = np.random.uniform(low=action_spec.minimum,
                              high=action_spec.maximum,
                              size=action_spec.shape)
-# prev_action[rh_forearm_tx_idx] = 0 # rh forearms
-# prev_action[lh_forearm_tx_idx] = 0 # lh forearms
+prev_action[rh_forearm_tx_idx] = 0 # rh forearms
+prev_action[lh_forearm_tx_idx] = 0 # lh forearms
 
 def random_policy(time_step):
     global count, prev_action
     count += 1
-    if count % 8 == 0:
-        prev_action = np.random.uniform(low=action_spec.minimum,
-                             high=action_spec.maximum,
-                             size=action_spec.shape)
+    prev_action = np.full(action_spec.shape, 0.0)
+    prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
+    prev_action[rh_forearm_tx_idx] = 0 # rh forearms
+    prev_action[lh_forearm_tx_idx] = 0 # lh forearms
+    # if count % 8 == 0:
+    #     prev_action = np.random.uniform(low=-1.0,
+    #                          high=1.0,
+    #                          size=action_spec.shape)
+    #     prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
         # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
         # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
         # print(prev_action)
     return prev_action
 
+
+def scale_action_vector(action_vector, minimum, maximum):    
+    if action_vector.shape != minimum.shape or action_vector.shape != maximum.shape:
+        raise ValueError("Action vector, minimum, and maximum must have the same shape.")
+    return minimum + (action_vector + 1) * 0.5 * (maximum - minimum)    
+
+action = np.random.uniform(low=-1.0,
+                        high=1.0,
+                        size=action_spec.shape)
+action = scale_action_vector(action, action_spec.minimum, action_spec.maximum)
+
+
 print(f"Action Spec Length: {len(action_spec.minimum)}")
-# print(action_spec.name)
-# print()
-# print(action_spec.minimum)
-# print()
-# print(action_spec.maximum)
+print(action_spec.name)
+print()
+print(action_spec.minimum)
+print()
+print(action_spec.maximum)
 
 viewer.launch(env, policy=random_policy)
 
