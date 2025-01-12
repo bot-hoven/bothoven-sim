@@ -49,6 +49,8 @@ class PianoWithOneShadowHand(base.PianoTask):
         wrong_press_termination: bool = False,
         initial_buffer_time: float = 0.0,
         disable_fingering_reward: bool = False,
+        disable_forearm_reward: bool = False,
+        disable_hand_collisions: bool = False,
         disable_colorization: bool = False,
         augmentations: Optional[Sequence[base_variation.Variation]] = None,
         **kwargs,
@@ -321,7 +323,7 @@ class PianoWithOneShadowHand(base.PianoTask):
         # Enable hand observables.
         enabled_observables = [
             "joints_pos",
-            "position",
+            # "position",
             # "fingertip_positions",
             # "actuators_force",
             # "actuators_velocity",
@@ -330,8 +332,8 @@ class PianoWithOneShadowHand(base.PianoTask):
             getattr(self._hand.observables, obs).enabled = True
 
         # This returns the current state of the piano keys.
-        self.piano.observables.state.enabled = True
-        self.piano.observables.sustain_state.enabled = True
+        self.piano.observables.state.enabled = False
+        self.piano.observables.sustain_state.enabled = False
 
         # This returns the key activation state (on or off).
         # Disabling for now since pretty much redundant with the state observables.
@@ -370,14 +372,13 @@ class PianoWithOneShadowHand(base.PianoTask):
 
     def _colorize_fingertips(self) -> None:
         """Colorize the fingertips of the hands."""
-        for i, name in enumerate(hand_consts.FINGERTIP_BODIES):
-            color = hand_consts.FINGERTIP_COLORS[i] + (0.5,)
-            body = self._hand.mjcf_model.find("body", name)
-            for geom in body.find_all("geom"):
-                if geom.dclass.dclass == "plastic_visual":
-                    geom.rgba = color
-            # Also color the fingertip sites.
-            self._hand.fingertip_sites[i].rgba = color
+        for i, body in enumerate(self._hand.fingertip_bodies):
+                color = hand_consts.FINGERTIP_COLORS[i] + (1.0,)
+                for geom in body.find_all("geom"):
+                    if geom.dclass.dclass == "plastic_visual":
+                        geom.rgba = color
+                # Also color the fingertip sites.
+                self._hand.fingertip_sites[i].rgba = color
 
     def _colorize_keys(self, physics) -> None:
         """Colorize the keys by the corresponding fingertip color."""

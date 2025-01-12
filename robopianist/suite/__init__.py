@@ -21,7 +21,8 @@ from dm_control import composer
 from mujoco_utils import composer_utils
 
 from robopianist import music
-from robopianist.suite.tasks import piano_with_shadow_hands
+from robopianist.suite.tasks import piano_with_shadow_hands, piano_with_one_shadow_hand
+from robopianist.models.hands.base import HandSide
 
 # RoboPianist-repertoire-150.
 _BASE_REPERTOIRE_NAME = "RoboPianist-repertoire-150-{}-v0"
@@ -55,6 +56,7 @@ def load(
     shift: int = 0,
     recompile_physics: bool = False,
     legacy_step: bool = True,
+    right_hand_only: bool = False,
     task_kwargs: Optional[Mapping[str, Any]] = None,
 ) -> composer.Environment:
     """Loads a RoboPianist environment.
@@ -84,13 +86,22 @@ def load(
 
     task_kwargs = task_kwargs or {}
 
-    return composer_utils.Environment(
-        task=piano_with_shadow_hands.PianoWithShadowHands(midi=midi, **task_kwargs),
-        random_state=seed,
-        strip_singleton_obs_buffer_dim=True,
-        recompile_physics=recompile_physics,
-        legacy_step=legacy_step,
-    )
+    if right_hand_only:
+        return composer_utils.Environment(
+            task=piano_with_one_shadow_hand.PianoWithOneShadowHand(midi=midi, hand_side=HandSide.RIGHT, **task_kwargs),
+            random_state=seed,
+            strip_singleton_obs_buffer_dim=True,
+            recompile_physics=recompile_physics,
+            legacy_step=legacy_step,
+        )
+    else:
+        return composer_utils.Environment(
+            task=piano_with_shadow_hands.PianoWithShadowHands(midi=midi, **task_kwargs),
+            random_state=seed,
+            strip_singleton_obs_buffer_dim=True,
+            recompile_physics=recompile_physics,
+            legacy_step=legacy_step,
+        )
 
 
 __all__ = [
