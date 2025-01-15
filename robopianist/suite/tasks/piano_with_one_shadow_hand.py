@@ -116,7 +116,7 @@ class PianoWithOneShadowHand(base.PianoTask):
             key_press_reward=self._compute_key_press_reward,
             sustain_reward=self._compute_sustain_reward,
             energy_reward=self._compute_energy_reward,
-            finger_distance_reward=self._bothoven_finger_distance_reward,
+            bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
 
         )
         if not self._disable_fingering_reward:
@@ -240,10 +240,16 @@ class PianoWithOneShadowHand(base.PianoTask):
                 margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10),
                 sigmoid="gaussian",
             )
-            rew += 0.5 * rews.mean()
-        # If there's any false positive, the remaining 0.5 reward is lost.
+            # rew += 0.5 * rews.mean()
+            rew += rews.mean()
         off = np.flatnonzero(1 - self._goal_current[:-1])
-        rew += 0.5 * (1 - float(self.piano.activation[off].any()))
+        # If there's any false positive, the remaining 0.5 reward is lost.
+        # rew += 0.5 * (1 - float(self.piano.activation[off].any()))
+
+        # Remove 0.2 reward for every wrong key press. If all true positive keys are
+        # pressed at given timestep, rew from key proper key presses equals 1. Thus,
+        # if somehow also 10 FPs, will get reward -1 at that timestep.
+        rew -= 0.2 * float(np.sum(self.piano.activation[off]))
         return rew
     
     def _bothoven_finger_distance_reward(self, physics) -> float:
