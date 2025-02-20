@@ -19,10 +19,12 @@ env = suite.load(
     seed=42,
     right_hand_only=True,
     task_kwargs=dict(
+        n_steps_lookahead=10,
         trim_silence=True,
         gravity_compensation=True,
         bothoven_reduced_action_space=True,
         change_color_on_activation=True,
+        initial_buffer_time=5.0,
     ),
 )
 
@@ -78,6 +80,10 @@ tip_sites = env.task._hand.fingertip_sites
 
 def policy(timestep):
     act = np.full(actuators.shape[0] + 1, 0.0)
+
+    j3_act = np.random.choice([-1, 1], size=len(j3_idxs))
+    j3_act = scale_action_vector(j3_act, j3_min, j3_max)
+
     act[j3_idxs] = j3_act
     act[j4_idxs] = j4_act
 
@@ -87,6 +93,8 @@ def policy(timestep):
     # print(dist)
     return act
 
+obs = env.observation_spec()
+print(obs)
 
 print(env.task.reward_fn.reward_fns.keys())
 viewer.launch(env, policy=policy)

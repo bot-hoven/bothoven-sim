@@ -17,6 +17,7 @@
 from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 from dm_control.composer import variation as base_variation
 from dm_control.composer.observation import observable
 from dm_control.utils.rewards import tolerance
@@ -35,9 +36,12 @@ _FINGER_CLOSE_ENOUGH_TO_KEY = 0.01
 _KEY_CLOSE_ENOUGH_TO_PRESSED = 0.05
 _FINGERS_TOO_CLOSE = 0.022 # meters (this is default resting position, need to encourage more spread)
 
-# Energy penalty coefficient.
+# Reward weighting coefficients.
 _ENERGY_PENALTY_COEF = 5e-3
+_FINGER_DIST_COEF = 0.5
 
+# Discrete action indicies.
+_DISCRETE_IDXS = np.array([3, 5, 7, 9])
 
 class PianoWithOneShadowHand(base.PianoTask):
     def __init__(
@@ -96,6 +100,10 @@ class PianoWithOneShadowHand(base.PianoTask):
         self._disable_colorization = disable_colorization
         self._augmentations = augmentations
 
+        # For computing discrete action change frequency penalty
+        self._curr_action = None
+        self._prev_action = None
+
         self._hand_side = hand_side
         if self._hand_side == HandSide.LEFT:
             self._hand = self._left_hand
@@ -117,10 +125,15 @@ class PianoWithOneShadowHand(base.PianoTask):
             sustain_reward=self._compute_sustain_reward,
             energy_reward=self._compute_energy_reward,
             bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
-
+            bothoven_action_change_penalty=self._bothoven_action_change_penalty,
         )
         if not self._disable_fingering_reward:
             self._reward_fn.add("fingering_reward", self._bothoven_compute_fingering_reward)
+        else:
+            # use OT based fingering
+            print('Fingering is unavailable. OT fingering reward is used.')
+            self._reward_fn.add("ot_fingering_reward", self._compute_ot_fingering_reward)
+
 
     def _reset_quantities_at_episode_init(self) -> None:
         self._t_idx: int = 0
@@ -204,6 +217,9 @@ class PianoWithOneShadowHand(base.PianoTask):
         return spec_utils.merge_specs([hand_spec, sustain_spec])
 
     def before_step(self, physics, action, random_state) -> None:
+        self._prev_action = self._curr_action
+        self._curr_action = action
+
         sustain = action[-1]
         self.piano.apply_sustain(physics, sustain, random_state)
         self._hand.apply_action(physics, action[:-1], random_state)
@@ -246,11 +262,23 @@ class PianoWithOneShadowHand(base.PianoTask):
         # If there's any false positive, the remaining 0.5 reward is lost.
         # rew += 0.5 * (1 - float(self.piano.activation[off].any()))
 
-        # Remove 0.2 reward for every wrong key press. If all true positive keys are
-        # pressed at given timestep, rew from key proper key presses equals 1. Thus,
-        # if somehow also 10 FPs, will get reward -1 at that timestep.
-        rew -= 0.2 * float(np.sum(self.piano.activation[off]))
+        rew -= float(np.sum(self.piano.activation[off]))
         return rew
+    
+    def _bothoven_action_change_penalty(self, physics) -> float:
+        """
+        For every discrete action change, enact a penalty. If the action
+        is truly good, the reward from a correct key press will out-weigh
+        the state change penalty (rewards are computed at 20Hz, so if
+        the finger stays down on the correct key, much more reward will be
+        obtained than lost).
+        """
+        del physics # not used
+        if self._prev_action is None:
+            return 0.0
+        # -0.5 penalty for each discrete actions change
+        return -0.1 * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS])
+
     
     def _bothoven_finger_distance_reward(self, physics) -> float:
         """
@@ -268,13 +296,14 @@ class PianoWithOneShadowHand(base.PianoTask):
         
         distances = _distance_finger_to_finger(self._hand.fingertip_sites)
         
-        rews = -1 * tolerance(
+        rews = tolerance(
             np.hstack(distances),
             bounds=(0, _FINGERS_TOO_CLOSE),
-            margin=_FINGERS_TOO_CLOSE, # tolerance == 0.1 when 2 x 0.022 
-            sigmoid="gaussian"
+            margin=_FINGERS_TOO_CLOSE, # Note that margin is in addition to bounds. So, tolerance == 0.1 when 2 x 0.022 
+            sigmoid="gaussian",
         )
-        return float(np.mean(rews))
+        # return float(np.mean(rews))
+        return _FINGER_DIST_COEF * float(np.mean(1 - rews))
     
     def distance_finger_to_finger(self, physics, tip1: types.MjcfElement, tip2: types.MjcfElement):
         # xy-plane coords of tips
@@ -362,6 +391,43 @@ class PianoWithOneShadowHand(base.PianoTask):
             sigmoid="gaussian",
         )
         return float(np.mean(rews))
+
+    def _compute_ot_fingering_reward(self, physics) -> float:
+        """ OT reward calculation from RP1M https://arxiv.org/abs/2408.11048 """
+        # calcuate fingertip positions
+        fingertip_pos = [physics.bind(finger).xpos.copy() for finger in self.right_hand.fingertip_sites]
+        
+        # calcuate the positions of piano keys to press.
+        keys_to_press = np.flatnonzero(self._goal_current[:-1]) # keys to press
+        # if no key is pressed
+        if keys_to_press.shape[0] == 0:
+            return 1.
+
+        # calculate key pos
+        key_pos = []
+        for key in keys_to_press:
+            key_geom = self.piano.keys[key].geom[0]
+            key_geom_pos = physics.bind(key_geom).xpos.copy()
+            key_geom_pos[-1] += 0.5 * physics.bind(key_geom).size[2]
+            key_geom_pos[0] += 0.35 * physics.bind(key_geom).size[0]
+            key_pos.append(key_geom_pos.copy())
+
+        # calcualte the distance between keys and fingers
+        dist = np.full((len(fingertip_pos), len(key_pos)), 100.)
+        for i, finger in enumerate(fingertip_pos):
+            for j, key in enumerate(key_pos):
+                dist[i, j] = np.linalg.norm(key - finger)
+        
+        # calculate the shortest distance
+        row_ind, col_ind = linear_sum_assignment(dist)
+        dist = dist[row_ind, col_ind]
+        rews = tolerance(
+            dist,
+            bounds=(0, _FINGER_CLOSE_ENOUGH_TO_KEY),
+            margin=(_FINGER_CLOSE_ENOUGH_TO_KEY * 10),
+            sigmoid="gaussian",
+        )
+        return float(np.mean(rews))        
 
     def _update_goal_state(self) -> None:
         # Observable callables get called after `after_step` but before

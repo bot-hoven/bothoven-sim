@@ -77,22 +77,28 @@ def twinkle_twinkle_little_star_one_hand() -> midi_file.MidiFile:
 
     seq.notes.add(pitch=60, start_time=0.0, end_time=0.5, velocity=80, part=0)  # twin
     seq.notes.add(pitch=60, start_time=0.5, end_time=1.0, velocity=80, part=0)  # kle
-    seq.notes.add(pitch=67, start_time=1.0, end_time=1.5, velocity=80, part=2)  # twin
-    seq.notes.add(pitch=67, start_time=1.5, end_time=2.0, velocity=80, part=2)  # kle
-    seq.notes.add(pitch=69, start_time=2.0, end_time=2.5, velocity=80, part=3)  # lit
-    seq.notes.add(pitch=69, start_time=2.5, end_time=3.0, velocity=80, part=3)  # tle
-    seq.notes.add(pitch=67, start_time=3.0, end_time=4.0, velocity=80, part=2)  # star
+    seq.notes.add(pitch=67, start_time=1.0, end_time=1.5, velocity=80, part=3)  # twin
+    seq.notes.add(pitch=67, start_time=1.5, end_time=2.0, velocity=80, part=3)  # kle
+    seq.notes.add(pitch=69, start_time=2.0, end_time=2.5, velocity=80, part=4)  # lit
+    seq.notes.add(pitch=69, start_time=2.5, end_time=3.0, velocity=80, part=4)  # tle
+    seq.notes.add(pitch=67, start_time=3.0, end_time=4.0, velocity=80, part=3)  # star
 
-    seq.notes.add(pitch=65, start_time=4.0, end_time=4.5, velocity=80, part=3)  # how
-    seq.notes.add(pitch=65, start_time=4.5, end_time=5.0, velocity=80, part=3)  # I
-    seq.notes.add(pitch=64, start_time=5.0, end_time=5.5, velocity=80, part=2)  # won
-    seq.notes.add(pitch=64, start_time=5.5, end_time=6.0, velocity=80, part=2)  # der
-    seq.notes.add(pitch=62, start_time=6.0, end_time=6.5, velocity=80, part=1)  # what
-    seq.notes.add(pitch=62, start_time=6.5, end_time=7.0, velocity=80, part=1)  # you
+    seq.notes.add(pitch=65, start_time=4.0, end_time=4.5, velocity=80, part=2)  # how
+    seq.notes.add(pitch=65, start_time=4.5, end_time=5.0, velocity=80, part=2)  # I
+    seq.notes.add(pitch=64, start_time=5.0, end_time=5.5, velocity=80, part=1)  # won
+    seq.notes.add(pitch=64, start_time=5.5, end_time=6.0, velocity=80, part=1)  # der
+    seq.notes.add(pitch=62, start_time=6.0, end_time=6.5, velocity=80, part=0)  # what
+    seq.notes.add(pitch=62, start_time=6.5, end_time=7.0, velocity=80, part=0)  # you
     seq.notes.add(pitch=60, start_time=7.0, end_time=8.0, velocity=80, part=0)  # are
-
+    
     seq.total_time = 8.0
     seq.tempos.add(qpm=60)
+
+    # ---- Add 10 seconds of silence at the beginning ----
+    for note in seq.notes:
+        note.start_time += 10.0
+        note.end_time += 10.0
+    seq.total_time += 10.0
 
     return midi_file.MidiFile(seq=seq)
 
@@ -540,6 +546,103 @@ def nocturne_rousseau() -> midi_file.MidiFile:
 
     return midi
 
+def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
+    midi = midi_file.MidiFile.from_file(
+        _DATA_PATH / "rcm" / "extended_mary_had_a_little_lamb.mid"
+    )
+
+    # Add metadata.
+    midi.seq.sequence_metadata.artist = "RCM"
+    midi.seq.sequence_metadata.title = "Marry Had a Little Lamb"
+
+    # RH
+    #   THUMB:      0
+    #   POINTER:    1
+    #   MIDDLE:     2
+    #   RING:       3
+    #   PINKY:      4
+    #
+    # LH
+    #   THUMB:      5
+    #   POINTER:    6
+    #   MIDDLE:     7
+    #   RING:       8
+    #   PINKY:      9
+
+    FINGERING = [
+        #  Line : Finger
+        #  (RH = 0..4, LH = 5..9)
+
+        # lines 0..75
+        2,  # 0:  E5  (RH M)
+        1,  # 1:  D5  (RH F)
+        0,  # 2:  C5  (RH T)
+        5,  # 3:  E4  (LH T)
+        1,  # 4:  D5  (RH F)
+        6,  # 5:  D4  (LH F)
+        2,  # 6:  E5  (RH M)
+        7,  # 7:  C4  (LH M)
+        2,  # 8:  E5  (RH M)
+        6,  # 9:  D4  (LH F)
+        2,  # 10: E5  (RH M)
+        5,  # 11: E4  (LH T)
+        5,  # 12: E4  (LH T)
+        1,  # 13: D5  (RH F)
+        5,  # 14: E4  (LH T)
+        1,  # 15: D5  (RH F)
+        1,  # 16: D5  (RH F)
+        7,  # 17: D4  (LH M)
+        7,  # 18: D4  (LH M)
+        2,  # 19: E5  (RH M)
+        7,  # 20: D4  (LH M)
+        4,  # 21: G5  (RH P)
+        4,  # 22: G5  (RH P)
+        6,  # 23: E4  (LH F)
+        5,  # 24: G4  (LH T)
+        2,  # 25: E5  (RH M)
+        5,  # 26: G4  (LH T)
+        1,  # 27: D5  (RH F)
+        0,  # 28: C5  (RH T)
+        6,  # 29: E4  (LH F)
+        1,  # 30: D5  (RH F)
+        7,  # 31: D4  (LH M)
+        2,  # 32: E5  (RH M)
+        8,  # 33: C4  (LH R)
+        2,  # 34: E5  (RH M)
+        7,  # 35: D4  (LH M)
+        2,  # 36: E5  (RH M)
+        6,  # 37: E4  (LH F)
+        2,  # 38: E5  (RH M)
+        6,  # 39: E4  (LH F)
+        1,  # 40: D5  (RH F)
+        6,  # 41: E4  (LH F)
+        1,  # 42: D5  (RH F)
+        6,  # 43: E4  (LH F)
+        2,  # 44: E5  (RH M)
+        7,  # 45: D4  (LH M)
+        1,  # 46: D5  (RH F)
+        7,  # 47: D4  (LH M)
+        2,  # 49: E5  (RH M)
+        0,  # 48: C5  (RH T)
+        5,  # 49: E4  (LH T)
+        6,  # 50: D4  (LH F)
+        7,  # 51: C4  (LH M)
+    ]
+
+    # Sort by start_time (ascending) and pitch (descending)
+    sorted_notes = sorted(
+        midi.seq.notes,
+        key=lambda note: (note.start_time, -note.pitch)  # Sorting by start_time, then pitch
+    )
+
+    # assert len(FINGERING) == len(sorted_notes)
+
+    # for i, note in enumerate(sorted_notes):
+    #     # print(f"{i}:\tStart Time: {round(note.start_time, 4)}\tNote: {midi_file.midi_number_to_note_name(note.pitch)},\tFinger: {FINGERING[i]}")
+    #     note.part = FINGERING[i]
+
+    return midi
+
 
 MIDI_NAME_TO_CALLABLE: Dict[str, Callable[[], midi_file.MidiFile]] = {
     "TwinkleTwinkleLittleStar": twinkle_twinkle_little_star_one_hand,
@@ -550,4 +653,7 @@ MIDI_NAME_TO_CALLABLE: Dict[str, Callable[[], midi_file.MidiFile]] = {
     "CMajorChordProgressionTwoHands": c_major_chord_progression_two_hands,
     "TwinkleTwinkleRousseau": twinkle_twinkle_rousseau,
     "NocturneRousseau": nocturne_rousseau,
+    "RCM_MaryHadALittleLamb": rcm_marry_had_a_little_lamb,
 }
+
+midi = rcm_marry_had_a_little_lamb()

@@ -24,7 +24,7 @@ from dm_control.composer.observation import observable
 from dm_control.mjcf import commit_defaults
 from dm_control.utils.rewards import tolerance
 from dm_env import specs
-from mujoco_utils import collision_utils, spec_utils
+from mujoco_utils import collision_utils, spec_utils, types
 
 import robopianist.models.hands.shadow_hand_constants as hand_consts
 from robopianist.models.arenas import stage
@@ -35,9 +35,11 @@ from robopianist.suite.tasks import base
 # Distance thresholds for the shaping reward.
 _FINGER_CLOSE_ENOUGH_TO_KEY = 0.01
 _KEY_CLOSE_ENOUGH_TO_PRESSED = 0.05
+_FINGERS_TOO_CLOSE = 0.022 # meters (this is default resting position, need to encourage more spread)
 
-# Energy penalty coefficient.
+# Reward weighting coefficients.
 _ENERGY_PENALTY_COEF = 5e-3
+_FINGER_DIST_COEF = 0.25
 
 # Transparency of fingertip geoms.
 _FINGERTIP_ALPHA = 1.0
@@ -45,6 +47,8 @@ _FINGERTIP_ALPHA = 1.0
 # Bounds for the uniform distribution from which initial hand offset is sampled.
 _POSITION_OFFSET = 0.05
 
+# Discrete action indicies.
+_DISCRETE_IDXS = np.array([3, 5, 7, 9, 14, 16, 18, 20])
 
 class PianoWithShadowHands(base.PianoTask):
     def __init__(
@@ -118,6 +122,10 @@ class PianoWithShadowHands(base.PianoTask):
         self._energy_penalty_coef = energy_penalty_coef
         self._randomize_hand_positions = randomize_hand_positions
 
+        # For computing discrete action change frequency penalty
+        self._curr_action = None
+        self._prev_action = None
+
         if not disable_fingering_reward and not disable_colorization:
             self._colorize_fingertips()
         if disable_hand_collisions:
@@ -132,9 +140,12 @@ class PianoWithShadowHands(base.PianoTask):
             key_press_reward=self._compute_key_press_reward,
             sustain_reward=self._compute_sustain_reward,
             energy_reward=self._compute_energy_reward,
+            bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
+            bothoven_action_change_penalty=self._bothoven_action_change_penalty,
         )
         if not self._disable_fingering_reward:
-            self._reward_fn.add("fingering_reward", self._compute_fingering_reward)
+            self._reward_fn.add("fingering_reward", self._bothoven_compute_fingering_reward)
+            # self._reward_fn.add("fingering_reward", self._compute_fingering_reward)
         else:
             # use OT based fingering
             print('Fingering is unavailable. OT fingering reward is used.')
@@ -180,6 +191,9 @@ class PianoWithShadowHands(base.PianoTask):
         random_state: np.random.RandomState,
     ) -> None:
         """Applies the control to the hands and the sustain pedal to the piano."""
+        self._prev_action = self._curr_action
+        self._curr_action = action
+
         action_right, action_left = np.split(action[:-1], 2)
         self.right_hand.apply_action(physics, action_right, random_state)
         self.left_hand.apply_action(physics, action_left, random_state)
@@ -298,26 +312,95 @@ class PianoWithShadowHands(base.PianoTask):
             rew += rews.mean()
         
         off = np.flatnonzero(1 - self._goal_current[:-1])
-        
-        # NOTE: This is my (not tried) modification. If all actual[off] are 0,
-        # false_pos_penalty == 0, and get remaining 0.6 reward. Otherwise, start
-        # scaling back the 0.6 in proportion to how much each incorrect key is pressed.
-        # false_pos_penalty = tolerance(
-        #     1.0 - actual[off], # if actual[off] within 0.05 of 1.0, tolerance() sets it to 1.0
-        #     bounds=(0, _KEY_CLOSE_ENOUGH_TO_PRESSED),
-        #     margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10), # start penalizing at 0.5 (half depression)
-        #     sigmoid="gaussian",
-        # )
-        # rew += 0.6 * (1 - (false_pos_penalty.sum() / 10))
 
         # Remove 0.2 reward for every wrong key press. If all true positive keys are
         # pressed at given timestep, rew from key proper key presses equals 1. Thus,
         # if somehow also 10 FPs, will get reward -1 at that timestep.
-        rew -= 0.2 * float(np.sum(self.piano.activation[off]))
+        rew -= 0.4*float(np.sum(self.piano.activation[off]))
 
         # If there are any false positives, the remaining 0.5 reward is lost.
         # rew += 0.5 * (1 - float(self.piano.activation[off].any()))
         return rew
+    
+    def _bothoven_action_change_penalty(self, physics) -> float:
+        """
+        For every discrete action change, enact a penalty. If the action
+        is truly good, the reward from a correct key press will out-weigh
+        the state change penalty (rewards are computed at 20Hz, so if
+        the finger stays down on the correct key, much more reward will be
+        obtained than lost).
+        """
+        del physics # not used
+        if self._prev_action is None:
+            return 0.0
+        # -0.5 penalty for each discrete actions change
+        return -0.05 * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS])
+
+    def _bothoven_finger_distance_reward(self, physics) -> float:
+        """
+        Penalize fingers for coming too close to one another.
+        """
+        def _distance_finger_to_finger(fingertips: Sequence[types.MjcfElement]):
+            distances = []
+            for i,tip in enumerate(fingertips):
+                if i != len(fingertips) - 1:
+                    # xy-plane coords of successive tips
+                    tip1_pos = physics.bind(tip).xpos.copy()[:2]
+                    tip2_pos = physics.bind(fingertips[i+1]).xpos.copy()[:2]
+                    distances.append(float(np.linalg.norm(tip2_pos - tip1_pos)))
+            return distances
+        
+        distances = _distance_finger_to_finger(self.right_hand.fingertip_sites)
+        distances += _distance_finger_to_finger(self.left_hand.fingertip_sites)
+        
+        rews = tolerance(
+            np.hstack(distances),
+            bounds=(0, _FINGERS_TOO_CLOSE),
+            margin=1.5*_FINGERS_TOO_CLOSE, # Note that margin is in addition to bounds. So, tolerance == 0.1 when 2 x 0.022 
+            sigmoid="gaussian",
+        )
+        # return float(np.mean(rews))
+        return _FINGER_DIST_COEF * float(np.mean(1 - rews))
+
+    def _bothoven_compute_fingering_reward(self, physics) -> float:
+        """
+        Reward for minimizing distance between fingers and keys,
+        where distance is only in the XY-plane
+        """
+        def _distance_finger_to_key(
+            hand_keys: List[Tuple[int, int]], hand
+        ) -> List[float]:
+            distances = []
+            for key, mjcf_fingering in hand_keys:
+                fingertip_site = hand.fingertip_sites[mjcf_fingering]
+                fingertip_pos = physics.bind(fingertip_site).xpos.copy()
+                key_geom = self.piano.keys[key].geom[0]
+                key_geom_pos = physics.bind(key_geom).xpos.copy()
+                
+                key_geom_pos[0] += 0.35 * physics.bind(key_geom).size[0]
+
+                # only compute distances in xy plane (finger should hover key)
+                diff = key_geom_pos[:2] - fingertip_pos[:2]
+                distances.append(float(np.linalg.norm(diff)))
+            return distances
+        
+        # _keys_current is array of tuples of (key_id, finger)
+        # for finger supposed to press certain key.
+        distances = _distance_finger_to_key(self._rh_keys_current, self.right_hand)
+        distances += _distance_finger_to_key(self._lh_keys_current, self.left_hand)
+
+        # Case where there are no keys to press at this timestep.
+        # TODO(kevin): Unclear if we should return 0 or 1 here. 0 seems to do better.
+        if not distances:
+            return 0.0
+
+        rews = tolerance(
+            np.hstack(distances),
+            bounds=(0, _FINGER_CLOSE_ENOUGH_TO_KEY),
+            margin=(_FINGER_CLOSE_ENOUGH_TO_KEY * 10),
+            sigmoid="gaussian",
+        )
+        return float(np.mean(rews))
 
     def _compute_fingering_reward(self, physics: mjcf.Physics) -> float:
         """Reward for minimizing the distance between the fingers and the keys."""
