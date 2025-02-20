@@ -21,7 +21,7 @@ import numpy as np
 from dm_control import composer
 from mujoco_utils import composer_utils, physics_utils
 
-from robopianist.models.hands import HandSide, shadow_hand
+from robopianist.models.hands import HandSide, shadow_hand, bothoven_hand
 from robopianist.models.piano import piano
 
 # Timestep of the physics simulation, in seconds.
@@ -35,6 +35,10 @@ _LEFT_HAND_POSITION = (0.375, -0.15, 0.115)
 _LEFT_HAND_QUATERNION = (-1, -1, 1, 1)
 _RIGHT_HAND_POSITION = (0.375, 0.15, 0.115)
 _RIGHT_HAND_QUATERNION = (-1, -1, 1, 1)
+
+# Default position for bothoven
+_BOTHOVEN_LEFT_HAND_POSITION = (0.155, -0.15, 0.0175)
+_BOTHOVEN_RIGHT_HAND_POSITION = (0.155, 0.15, 0.0175)
 
 _ATTACHMENT_YAW = 0  # Degrees.
 
@@ -105,6 +109,7 @@ class PianoTask(PianoOnlyTask):
         forearm_dofs: Sequence[str] = shadow_hand._DEFAULT_FOREARM_DOFS,
         physics_timestep: float = _PHYSICS_TIMESTEP,
         control_timestep: float = _CONTROL_TIMESTEP,
+        use_bothoven_hand: bool = False,
     ) -> None:
         super().__init__(
             arena=arena,
@@ -113,29 +118,42 @@ class PianoTask(PianoOnlyTask):
             physics_timestep=physics_timestep,
             control_timestep=control_timestep,
         )
-
-        self._right_hand = self._add_hand(
-            hand_side=HandSide.RIGHT,
-            position=_RIGHT_HAND_POSITION,
-            quaternion=_RIGHT_HAND_QUATERNION,
-            gravity_compensation=gravity_compensation,
-            primitive_fingertip_collisions=primitive_fingertip_collisions,
-            reduced_action_space=reduced_action_space,
-            bothoven_reduced_action_space=bothoven_reduced_action_space,
-            attachment_yaw=attachment_yaw,
-            forearm_dofs=forearm_dofs,
-        )
-        self._left_hand = self._add_hand(
-            hand_side=HandSide.LEFT,
-            position=_LEFT_HAND_POSITION,
-            quaternion=_LEFT_HAND_QUATERNION,
-            gravity_compensation=gravity_compensation,
-            primitive_fingertip_collisions=primitive_fingertip_collisions,
-            reduced_action_space=reduced_action_space,
-            bothoven_reduced_action_space=bothoven_reduced_action_space,
-            attachment_yaw=attachment_yaw,
-            forearm_dofs=forearm_dofs,
-        )
+        if use_bothoven_hand:
+            self._right_hand = self._add_bothoven_hand(
+                hand_side=HandSide.RIGHT,
+                position=_BOTHOVEN_RIGHT_HAND_POSITION,
+                gravity_compensation=gravity_compensation,
+                primitive_fingertip_collisions=primitive_fingertip_collisions,
+            )
+            self._left_hand = self._add_bothoven_hand(
+                hand_side=HandSide.LEFT,
+                position=_BOTHOVEN_LEFT_HAND_POSITION,
+                gravity_compensation=gravity_compensation,
+                primitive_fingertip_collisions=primitive_fingertip_collisions,
+            )
+        else:
+            self._right_hand = self._add_hand(
+                hand_side=HandSide.RIGHT,
+                position=_RIGHT_HAND_POSITION,
+                quaternion=_RIGHT_HAND_QUATERNION,
+                gravity_compensation=gravity_compensation,
+                primitive_fingertip_collisions=primitive_fingertip_collisions,
+                reduced_action_space=reduced_action_space,
+                bothoven_reduced_action_space=bothoven_reduced_action_space,
+                attachment_yaw=attachment_yaw,
+                forearm_dofs=forearm_dofs,
+            )
+            self._left_hand = self._add_hand(
+                hand_side=HandSide.LEFT,
+                position=_LEFT_HAND_POSITION,
+                quaternion=_LEFT_HAND_QUATERNION,
+                gravity_compensation=gravity_compensation,
+                primitive_fingertip_collisions=primitive_fingertip_collisions,
+                reduced_action_space=reduced_action_space,
+                bothoven_reduced_action_space=bothoven_reduced_action_space,
+                attachment_yaw=attachment_yaw,
+                forearm_dofs=forearm_dofs,
+            )
 
     # Accessors.
 
@@ -198,6 +216,52 @@ class PianoTask(PianoOnlyTask):
         if forearm_tx_joint is not None:
             forearm_tx_joint.range = joint_range
         forearm_tx_actuator = hand.mjcf_model.find("actuator", "forearm_tx")
+        if forearm_tx_actuator is not None:
+            forearm_tx_actuator.ctrlrange = joint_range
+
+        self._arena.attach(hand)
+        return hand
+
+    def _add_bothoven_hand(
+        self,
+        hand_side: HandSide,
+        position,
+        gravity_compensation: bool,
+        primitive_fingertip_collisions: bool,
+    ) -> bothoven_hand.BothovenHand:
+        joint_range = [-self._piano.size[1], self._piano.size[1]]
+
+        # Offset the joint range by the hand's initial position.
+        # NOTE(me): This ensures that joint_range along the piano is
+        # specified relative to its initial position (centers the
+        # 0 point of the linear range at the start position).
+        # ----------------------------------------------------
+        # Thus, we will need to convert this to absolute position on the rail (or not?) on
+        # ROS side. The reason this is necessary is because we place the robot at `position`
+        # in the piano base frame, and then it moves along its slider joint (in its OWN local
+        # hand frame), so after being placed within the piano base frame at an offset already
+        # this local frame needs to know that it can only actually move left
+        # by joint_range[0] - position[1] and right by joint_range[1] - position[1]. Additionally,
+        # it needs to be +- instead of [0, max] because the local coordinate frame for the hand is
+        # centered on the hand, so it either moves right or left relative to ITS origin. For both
+        # left and right hands, positive along y-axis is LEFT for forearm joint (I believe)
+        joint_range[0] -= position[1]
+        joint_range[1] -= position[1]
+
+        hand = bothoven_hand.BothovenHand(
+            side=hand_side,
+            primitive_fingertip_collisions=primitive_fingertip_collisions,
+        )
+        hand.root_body.pos = position
+
+        if gravity_compensation:
+            physics_utils.compensate_gravity(hand.mjcf_model)
+
+        # Override forearm translation joint range.
+        forearm_tx_joint = hand.mjcf_model.find("joint", "base_link_to_base")
+        if forearm_tx_joint is not None:
+            forearm_tx_joint.range = joint_range
+        forearm_tx_actuator = hand.mjcf_model.find("actuator", "stepper")
         if forearm_tx_actuator is not None:
             forearm_tx_actuator.ctrlrange = joint_range
 

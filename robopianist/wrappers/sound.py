@@ -25,7 +25,7 @@ from dm_env_wrappers import DmControlVideoWrapper
 from robopianist import SF2_PATH
 from robopianist.models.piano import midi_module
 from robopianist.music import constants as consts
-# from robopianist.music import midi_message, synthesizer
+from robopianist.music import midi_message, synthesizer
 from robopianist.music import midi_message
 
 
@@ -47,7 +47,7 @@ class PianoSoundVideoWrapper(DmControlVideoWrapper):
 
         self._midi_module: midi_module.MidiModule = environment.task.piano.midi_module
         self._sample_rate = sample_rate
-        # self._synth = synthesizer.Synthesizer(sf2_path, sample_rate)
+        self._synth = synthesizer.Synthesizer(sf2_path, sample_rate)
 
     def _write_frames(self) -> None:
         super()._write_frames()
@@ -67,53 +67,53 @@ class PianoSoundVideoWrapper(DmControlVideoWrapper):
             return
 
         # Synthesize waveform.
-        # waveform = self._synth.get_samples(midi_events)
+        waveform = self._synth.get_samples(midi_events)
 
         # Save waveform as mp3.
-        # waveform_name = self._record_dir / f"{self._counter:05d}.mp3"
-        # wf = wave.open(str(waveform_name), "wb")
-        # wf.setnchannels(1)
-        # wf.setsampwidth(2)
-        # wf.setframerate(self._sample_rate * self._playback_speed)
-        # wf.writeframes(waveform)  # type: ignore
-        # wf.close()
+        waveform_name = self._record_dir / f"{self._counter:05d}.mp3"
+        wf = wave.open(str(waveform_name), "wb")
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(self._sample_rate * self._playback_speed)
+        wf.writeframes(waveform)  # type: ignore
+        wf.close()
 
         # Make a copy of the MP4 so that FFMPEG can overwrite it.
         filename = self._record_dir / f"{self._counter:05d}.mp4"
-        # temp_filename = self._record_dir / "temp.mp4"
-        # shutil.copyfile(filename, temp_filename)
-        # filename.unlink()
+        temp_filename = self._record_dir / "temp.mp4"
+        shutil.copyfile(filename, temp_filename)
+        filename.unlink()
 
         # Add the sound to the MP4 using FFMPEG, suppressing the output.
         # Reference: https://stackoverflow.com/a/11783474
-        # ret = subprocess.run(
-        #     [
-        #         "ffmpeg",
-        #         "-nostdin",
-        #         "-y",
-        #         "-i",
-        #         str(temp_filename),
-        #         "-i",
-        #         # str(waveform_name),
-        #         "-map",
-        #         "0",
-        #         "-map",
-        #         "1:a",
-        #         "-c:v",
-        #         "copy",
-        #         "-shortest",
-        #         str(filename),
-        #     ],
-        #     stdout=subprocess.DEVNULL,
-        #     stderr=subprocess.STDOUT,
-        #     check=True,
-        # )
-        # if ret.returncode != 0:
-        #     print(f"FFMPEG failed to add sound to video {temp_filename}.")
+        ret = subprocess.run(
+            [
+                "ffmpeg",
+                "-nostdin",
+                "-y",
+                "-i",
+                str(temp_filename),
+                "-i",
+                str(waveform_name),
+                "-map",
+                "0",
+                "-map",
+                "1:a",
+                "-c:v",
+                "copy",
+                "-shortest",
+                str(filename),
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+            check=True,
+        )
+        if ret.returncode != 0:
+            print(f"FFMPEG failed to add sound to video {temp_filename}.")
 
         # Remove temporary files.
-        # temp_filename.unlink()
-        # waveform_name.unlink()
+        temp_filename.unlink()
+        waveform_name.unlink()
 
-    # def __del__(self) -> None:
-    #     self._synth.stop()
+    def __del__(self) -> None:
+        self._synth.stop()

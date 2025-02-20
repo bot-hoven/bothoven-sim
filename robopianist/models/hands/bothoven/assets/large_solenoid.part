@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "aad42bbee8b53052c6a2e74e",
+    "documentMicroversion": "4f9cc7dc7e329aa6eb33f868",
+    "elementId": "45d1c7ea8654b88fca58539c",
+    "fullConfiguration": "default",
+    "id": "MNYxTDHb04viO10O4",
+    "isStandardContent": false,
+    "name": "Large Solenoid <5>",
+    "partId": "JlD",
+    "suppressed": false,
+    "type": "Part"
+}
