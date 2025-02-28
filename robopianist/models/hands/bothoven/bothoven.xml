@@ -13,12 +13,13 @@
     
     <default class="solenoid">
       <joint damping="0.1"/>
-      <position kp="3" ctrlrange="-0.523599 0" forcerange="-5 5"/>
+      <!-- <position kp="3" ctrlrange="-0.523599 0" forcerange="-5 5"/> -->
+      <position kp="3" ctrlrange="-0.45 0" forcerange="-5 5"/>
     </default>
     
     <default class="stepper">
-      <joint damping="25" type="slide" axis="0 1 0"/>
-      <position kp="60" ctrlrange="-2 2"/>
+      <joint damping="22" type="slide" axis="0 1 0"/>
+      <position kp="40" ctrlrange="-2 2"/>
     </default>
   </default>
 

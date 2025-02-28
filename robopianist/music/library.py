@@ -77,14 +77,14 @@ def twinkle_twinkle_little_star_one_hand() -> midi_file.MidiFile:
 
     seq.notes.add(pitch=60, start_time=0.0, end_time=0.5, velocity=80, part=0)  # twin
     seq.notes.add(pitch=60, start_time=0.5, end_time=1.0, velocity=80, part=0)  # kle
-    seq.notes.add(pitch=67, start_time=1.0, end_time=1.5, velocity=80, part=3)  # twin
-    seq.notes.add(pitch=67, start_time=1.5, end_time=2.0, velocity=80, part=3)  # kle
-    seq.notes.add(pitch=69, start_time=2.0, end_time=2.5, velocity=80, part=4)  # lit
-    seq.notes.add(pitch=69, start_time=2.5, end_time=3.0, velocity=80, part=4)  # tle
-    seq.notes.add(pitch=67, start_time=3.0, end_time=4.0, velocity=80, part=3)  # star
+    seq.notes.add(pitch=67, start_time=1.0, end_time=1.5, velocity=80, part=2)  # twin
+    seq.notes.add(pitch=67, start_time=1.5, end_time=2.0, velocity=80, part=2)  # kle
+    seq.notes.add(pitch=69, start_time=2.0, end_time=2.5, velocity=80, part=3)  # lit
+    seq.notes.add(pitch=69, start_time=2.5, end_time=3.0, velocity=80, part=3)  # tle
+    seq.notes.add(pitch=67, start_time=3.0, end_time=4.0, velocity=80, part=2)  # star
 
-    seq.notes.add(pitch=65, start_time=4.0, end_time=4.5, velocity=80, part=2)  # how
-    seq.notes.add(pitch=65, start_time=4.5, end_time=5.0, velocity=80, part=2)  # I
+    seq.notes.add(pitch=65, start_time=4.0, end_time=4.5, velocity=80, part=1)  # how
+    seq.notes.add(pitch=65, start_time=4.5, end_time=5.0, velocity=80, part=1)  # I
     seq.notes.add(pitch=64, start_time=5.0, end_time=5.5, velocity=80, part=1)  # won
     seq.notes.add(pitch=64, start_time=5.5, end_time=6.0, velocity=80, part=1)  # der
     seq.notes.add(pitch=62, start_time=6.0, end_time=6.5, velocity=80, part=0)  # what
@@ -548,7 +548,7 @@ def nocturne_rousseau() -> midi_file.MidiFile:
 
 def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
     midi = midi_file.MidiFile.from_file(
-        _DATA_PATH / "rcm" / "extended_mary_had_a_little_lamb.mid"
+        _DATA_PATH / "rcm" / "mary_had_a_little_lamb.mid"
     )
 
     # Add metadata.
@@ -635,11 +635,11 @@ def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
         key=lambda note: (note.start_time, -note.pitch)  # Sorting by start_time, then pitch
     )
 
-    # assert len(FINGERING) == len(sorted_notes)
+    assert len(FINGERING) == len(sorted_notes)
 
-    # for i, note in enumerate(sorted_notes):
-    #     # print(f"{i}:\tStart Time: {round(note.start_time, 4)}\tNote: {midi_file.midi_number_to_note_name(note.pitch)},\tFinger: {FINGERING[i]}")
-    #     note.part = FINGERING[i]
+    for i, note in enumerate(sorted_notes):
+        # print(f"{i}:\tStart Time: {round(note.start_time, 4)}\tNote: {midi_file.midi_number_to_note_name(note.pitch)},\tFinger: {FINGERING[i]}")
+        note.part = FINGERING[i]
 
     return midi
 
@@ -655,5 +655,3 @@ MIDI_NAME_TO_CALLABLE: Dict[str, Callable[[], midi_file.MidiFile]] = {
     "NocturneRousseau": nocturne_rousseau,
     "RCM_MaryHadALittleLamb": rcm_marry_had_a_little_lamb,
 }
-
-midi = rcm_marry_had_a_little_lamb()

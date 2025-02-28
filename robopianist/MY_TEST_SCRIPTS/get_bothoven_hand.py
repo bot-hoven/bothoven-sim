@@ -32,8 +32,8 @@ r_hand_joints = r_hand.find_all("joint", exclude_attachments=True)
 r_hand_actuators = r_hand.find_all("actuator", exclude_attachments=True)
 
 rh_forearm_tx_idx = [i for i,a in enumerate(r_hand_actuators) if a.name == "stepper"][0]
-rh_forearm_ty_idx = rh_forearm_tx_idx + 1
-# lh_forearm_tx_idx = len(r_hand_actuators) + rh_forearm_tx_idx
+# rh_forearm_ty_idx = rh_forearm_tx_idx + 1
+lh_forearm_tx_idx = len(r_hand_actuators) + rh_forearm_tx_idx
 # lh_forearm_ty_idx = lh_forearm_tx_idx + 1
 
 # joint_positions = env.physics.bind(r_hand_joints).qpos
@@ -42,7 +42,7 @@ rh_forearm_ty_idx = rh_forearm_tx_idx + 1
 # get indices of up/down actions
 action_spec = env.action_spec()
 action_names = action_spec.name.split("\t")
-up_down_idxs = [i for i,name in enumerate(action_names) if name[-2:] == "J3"]
+up_down_idxs = np.array([i for i,name in enumerate(action_names) if (name[-10:])[:-2] == "solenoid"])
 mask = np.zeros_like(action_names, dtype=bool)
 mask[up_down_idxs] = True
 
@@ -53,8 +53,8 @@ prev_action = np.random.uniform(low=action_spec.minimum,
                              high=action_spec.maximum,
                              size=action_spec.shape)
 prev_action[rh_forearm_tx_idx] = 0 # rh forearms
-prev_action[rh_forearm_ty_idx] = 0
-# prev_action[lh_forearm_tx_idx] = 0 # lh forearms
+# prev_action[rh_forearm_ty_idx] = 0
+prev_action[lh_forearm_tx_idx] = 0 # lh forearms
 # prev_action[lh_forearm_ty_idx] = 0
 
 # prev_action = np.full(action_spec.shape, 0)
@@ -68,10 +68,10 @@ def random_policy(time_step):
     global count, prev_action
     count += 1
     # prev_action = np.full(action_spec.shape, 0)
-    # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
-    # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
     prev_action[rh_forearm_tx_idx] = 0 # rh forearms
-    prev_action[rh_forearm_ty_idx] = 0
+    prev_action[lh_forearm_tx_idx] = 0 # lh forearms
+    # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
+    # prev_action[rh_forearm_ty_idx] = 0
     # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
     # prev_action[lh_forearm_ty_idx] = 0
     if count % 10 == 0:
@@ -84,10 +84,12 @@ def random_policy(time_step):
         prev_action = np.random.uniform(low=-1.0,
                              high=1.0,
                              size=action_spec.shape)
+        prev_action[up_down_idxs[prev_action[up_down_idxs] > 0]] = 1   # Set positive values to 1
+        prev_action[up_down_idxs[prev_action[up_down_idxs] < 0]] = -1 
         prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
         prev_action[rh_forearm_tx_idx] = 0 # rh forearms
-        prev_action[rh_forearm_ty_idx] = 0
-        # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
+        # prev_action[rh_forearm_ty_idx] = 0
+        prev_action[lh_forearm_tx_idx] = 0 # lh forearms
         # prev_action[lh_forearm_ty_idx] = 0
         print(prev_action)
     return prev_action

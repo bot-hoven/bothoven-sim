@@ -42,6 +42,7 @@ _FINGER_DIST_COEF = 0.5
 
 # Discrete action indicies.
 _DISCRETE_IDXS = np.array([3, 5, 7, 9])
+_BOTHOVEN_DISCRETE_IDXS = np.array([1, 3, 5, 7, 9]) # for our hands
 
 class PianoWithOneShadowHand(base.PianoTask):
     def __init__(
@@ -99,6 +100,7 @@ class PianoWithOneShadowHand(base.PianoTask):
         self._wrong_press_termination = wrong_press_termination
         self._disable_colorization = disable_colorization
         self._augmentations = augmentations
+        self._use_bothoven = kwargs['use_bothoven_hand']
 
         # For computing discrete action change frequency penalty
         self._curr_action = None
@@ -124,8 +126,8 @@ class PianoWithOneShadowHand(base.PianoTask):
             key_press_reward=self._compute_key_press_reward,
             sustain_reward=self._compute_sustain_reward,
             energy_reward=self._compute_energy_reward,
-            bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
-            bothoven_action_change_penalty=self._bothoven_action_change_penalty,
+            # bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
+            # bothoven_action_change_penalty=self._bothoven_action_change_penalty,
         )
         if not self._disable_fingering_reward:
             self._reward_fn.add("fingering_reward", self._bothoven_compute_fingering_reward)
@@ -256,13 +258,13 @@ class PianoWithOneShadowHand(base.PianoTask):
                 margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10),
                 sigmoid="gaussian",
             )
-            # rew += 0.5 * rews.mean()
-            rew += rews.mean()
+            rew += 0.5 * rews.mean()
+            # rew += rews.mean()
         off = np.flatnonzero(1 - self._goal_current[:-1])
         # If there's any false positive, the remaining 0.5 reward is lost.
-        # rew += 0.5 * (1 - float(self.piano.activation[off].any()))
+        rew += 0.5 * (1 - float(self.piano.activation[off].any()))
 
-        rew -= float(np.sum(self.piano.activation[off]))
+        # rew -= float(np.sum(self.piano.activation[off]))
         return rew
     
     def _bothoven_action_change_penalty(self, physics) -> float:
@@ -277,7 +279,10 @@ class PianoWithOneShadowHand(base.PianoTask):
         if self._prev_action is None:
             return 0.0
         # -0.5 penalty for each discrete actions change
-        return -0.1 * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS])
+        alpha = 0.2
+        if self._use_bothoven:
+            return -alpha * np.sum(self._prev_action[_BOTHOVEN_DISCRETE_IDXS] != self._curr_action[_BOTHOVEN_DISCRETE_IDXS])
+        return -alpha * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS]) # for reduced shadow hands
 
     
     def _bothoven_finger_distance_reward(self, physics) -> float:
@@ -299,7 +304,7 @@ class PianoWithOneShadowHand(base.PianoTask):
         rews = tolerance(
             np.hstack(distances),
             bounds=(0, _FINGERS_TOO_CLOSE),
-            margin=_FINGERS_TOO_CLOSE, # Note that margin is in addition to bounds. So, tolerance == 0.1 when 2 x 0.022 
+            margin=2*_FINGERS_TOO_CLOSE, # Note that margin is in addition to bounds. So, tolerance == 0.1 when margin + this 
             sigmoid="gaussian",
         )
         # return float(np.mean(rews))
@@ -528,8 +533,11 @@ class PianoWithOneShadowHand(base.PianoTask):
         for i, body in enumerate(self._hand.fingertip_bodies):
                 color = hand_consts.FINGERTIP_COLORS[i] + (1.0,)
                 for geom in body.find_all("geom"):
-                    if geom.dclass.dclass == "plastic_visual":
-                        geom.rgba = color
+                    if not self._use_bothoven:
+                        if geom.dclass.dclass == "plastic_visual":
+                            geom.rgba = color
+                    else:
+                        geom.rgba = color # only one geom in finger_arm_large_N body
                 # Also color the fingertip sites.
                 self._hand.fingertip_sites[i].rgba = color
 

@@ -37,8 +37,8 @@ _RIGHT_HAND_POSITION = (0.375, 0.15, 0.115)
 _RIGHT_HAND_QUATERNION = (-1, -1, 1, 1)
 
 # Default position for bothoven
-_BOTHOVEN_LEFT_HAND_POSITION = (0.155, -0.15, 0.0175)
-_BOTHOVEN_RIGHT_HAND_POSITION = (0.155, 0.15, 0.0175)
+_BOTHOVEN_LEFT_HAND_POSITION = (0.1425, -0.15, 0.03)
+_BOTHOVEN_RIGHT_HAND_POSITION = (0.1425, 0.15, 0.03)
 
 _ATTACHMENT_YAW = 0  # Degrees.
 
@@ -118,7 +118,9 @@ class PianoTask(PianoOnlyTask):
             physics_timestep=physics_timestep,
             control_timestep=control_timestep,
         )
+
         if use_bothoven_hand:
+            print("Using Bothoven!")
             self._right_hand = self._add_bothoven_hand(
                 hand_side=HandSide.RIGHT,
                 position=_BOTHOVEN_RIGHT_HAND_POSITION,
