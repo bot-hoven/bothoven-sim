@@ -110,26 +110,26 @@ class BothovenHand(base.Hand):
         self._joint_torque_sensors = tuple(joint_torque_sensors)
 
         # Add velocity and force sensors to the actuators.
-        actuator_velocity_sensors = []
-        actuator_force_sensors = []
-        for actuator_elem in self._actuators:
-            # Add actuatorvel tags to the sensors section of the MJCF
-            velocity_sensor_elem = self._mjcf_root.sensor.add(
-                "actuatorvel",
-                actuator=actuator_elem,
-                name=actuator_elem.name + "_velocity",
-            )
-            actuator_velocity_sensors.append(velocity_sensor_elem)
+        # actuator_velocity_sensors = []
+        # actuator_force_sensors = []
+        # for actuator_elem in self._actuators:
+        #     # Add actuatorvel tags to the sensors section of the MJCF
+        #     velocity_sensor_elem = self._mjcf_root.sensor.add(
+        #         "actuatorvel",
+        #         actuator=actuator_elem,
+        #         name=actuator_elem.name + "_velocity",
+        #     )
+        #     actuator_velocity_sensors.append(velocity_sensor_elem)
 
-            # Add actuatorfrc tags to the sensors section of the MJCF
-            force_sensor_elem = self._mjcf_root.sensor.add(
-                "actuatorfrc",
-                actuator=actuator_elem,
-                name=actuator_elem.name + "_force",
-            )
-            actuator_force_sensors.append(force_sensor_elem)
-        self._actuator_velocity_sensors = tuple(actuator_velocity_sensors)
-        self._actuator_force_sensors = tuple(actuator_force_sensors)
+        #     # Add actuatorfrc tags to the sensors section of the MJCF
+        #     force_sensor_elem = self._mjcf_root.sensor.add(
+        #         "actuatorfrc",
+        #         actuator=actuator_elem,
+        #         name=actuator_elem.name + "_force",
+        #     )
+        #     actuator_force_sensors.append(force_sensor_elem)
+        # self._actuator_velocity_sensors = tuple(actuator_velocity_sensors)
+        # self._actuator_force_sensors = tuple(actuator_force_sensors)
 
         # Add touch sensors to the fingertips.
         fingertip_touch_sensors = []
@@ -226,35 +226,35 @@ class BothovenHand(base.Hand):
         random_state: np.random.RandomState,
     ) -> None:
         del random_state  # Unused.
-        physics.bind(self.actuators).ctrl = action
+        # physics.bind(self.actuators).ctrl = action
 
 class BothovenHandObservables(base.HandObservables):
     """BothovenHand observables."""
 
     _entity: BothovenHand
 
-    @composer.observable
-    def actuators_force(self):
-        """Returns the actuator forces."""
-        return observable.MJCFFeature("sensordata", self._entity.actuator_force_sensors)
+    # @composer.observable
+    # def actuators_force(self):
+    #     """Returns the actuator forces."""
+    #     return observable.MJCFFeature("sensordata", self._entity.actuator_force_sensors)
 
-    @composer.observable
-    def actuators_velocity(self):
-        """Returns the actuator velocities."""
-        return observable.MJCFFeature(
-            "sensordata", self._entity.actuator_velocity_sensors
-        )
+    # @composer.observable
+    # def actuators_velocity(self):
+    #     """Returns the actuator velocities."""
+    #     return observable.MJCFFeature(
+    #         "sensordata", self._entity.actuator_velocity_sensors
+    #     )
 
-    @composer.observable
-    def actuators_power(self):
-        """Returns the actuator powers."""
+    # @composer.observable
+    # def actuators_power(self):
+    #     """Returns the actuator powers."""
 
-        def _get_actuator_power(physics: mjcf.Physics) -> np.ndarray:
-            force = physics.bind(self._entity.actuator_force_sensors).sensordata
-            velocity = physics.bind(self._entity.actuator_velocity_sensors).sensordata
-            return abs(force) * abs(velocity)
+    #     def _get_actuator_power(physics: mjcf.Physics) -> np.ndarray:
+    #         force = physics.bind(self._entity.actuator_force_sensors).sensordata
+    #         velocity = physics.bind(self._entity.actuator_velocity_sensors).sensordata
+    #         return abs(force) * abs(velocity)
 
-        return observable.Generic(raw_observation_callable=_get_actuator_power)
+    #     return observable.Generic(raw_observation_callable=_get_actuator_power)
 
     @composer.observable
     def fingertip_positions(self):

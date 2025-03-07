@@ -25,6 +25,7 @@ from dm_env import specs
 from mujoco_utils import spec_utils, types
 
 import robopianist.models.hands.shadow_hand_constants as hand_consts
+import robopianist.models.piano.piano_constants as piano_consts
 from robopianist.models.arenas import stage
 from robopianist.models.hands import HandSide
 from robopianist.music import midi_file
@@ -32,17 +33,19 @@ from robopianist.suite import composite_reward
 from robopianist.suite.tasks import base
 
 # Distance thresholds for the shaping reward.
-_FINGER_CLOSE_ENOUGH_TO_KEY = 0.01
+_FINGER_CLOSE_ENOUGH_TO_KEY = 0.005
 _KEY_CLOSE_ENOUGH_TO_PRESSED = 0.05
 _FINGERS_TOO_CLOSE = 0.022 # meters (this is default resting position, need to encourage more spread)
+_TARGET_SPREAD = 1.75 * piano_consts.WHITE_KEY_WIDTH
 
 # Reward weighting coefficients.
 _ENERGY_PENALTY_COEF = 5e-3
 _FINGER_DIST_COEF = 0.5
+_SPREAD_COEF = 0.2
 
 # Discrete action indicies.
 _DISCRETE_IDXS = np.array([3, 5, 7, 9])
-_BOTHOVEN_DISCRETE_IDXS = np.array([1, 3, 5, 7, 9]) # for our hands
+_BOTHOVEN_DISCRETE_IDXS = np.array([2, 4, 6, 8, 10]) # for our hands
 
 class PianoWithOneShadowHand(base.PianoTask):
     def __init__(
@@ -240,8 +243,9 @@ class PianoWithOneShadowHand(base.PianoTask):
 
     def _compute_energy_reward(self, physics) -> float:
         """Reward for minimizing energy."""
-        power = self._hand.observables.actuators_power(physics).copy()
-        return -_ENERGY_PENALTY_COEF * np.sum(power)
+        # power = self._hand.observables.actuators_power(physics).copy()
+        # return -_ENERGY_PENALTY_COEF * np.sum(power)
+        return 0
 
     def _compute_key_press_reward(self, physics) -> float:
         """Reward for pressing the right keys at the right time."""
@@ -309,6 +313,57 @@ class PianoWithOneShadowHand(base.PianoTask):
         )
         # return float(np.mean(rews))
         return _FINGER_DIST_COEF * float(np.mean(1 - rews))
+
+    
+    def _bothoven_spread_from_key(self, physics) -> float:
+        """
+        Reward fingers for moving away from keys that their neighbouring finger is assigned to press.
+        """
+        def _distance_finger_to_key(
+            hand_keys: List[Tuple[int, int]], hand
+        ) -> List[float]:
+            distances = []
+            for key, mjcf in hand_keys:
+                # Determine adjacent fingers to check
+                offsets = []
+                if mjcf == 0: # rh thumb
+                    offsets = [1]
+                elif mjcf == 4: # rh pinky
+                    offsets = [-1]
+                else:
+                    offsets = [1, -1]
+
+                # Get key position once per key
+                key_geom = self.piano.keys[key].geom[0]
+                key_pos = physics.bind(key_geom).xpos.copy()[1]
+                
+                key_pos_full = physics.bind(key_geom).xpos.copy()
+
+                # Process adjacent fingers
+                for offset in offsets:
+                    fingertip = hand.fingertip_sites[mjcf + offset]
+                    fingertip_pos = physics.bind(fingertip).xpos.copy()[1]
+                    fingertip_pos_full = physics.bind(fingertip).xpos.copy()
+                    print(f"Finger: {offset}\tFingertip Pos: {fingertip_pos_full}\tKey Pos: {key_pos_full}")
+                    distances.append(float(np.linalg.norm(key_pos - fingertip_pos)))
+            return distances
+        
+        # _keys_current is array of tuples of (key_id, finger)
+        # for finger supposed to press certain key.
+        distances = _distance_finger_to_key(self._keys_current, self._hand)
+
+        print(f"Distances: {distances}")
+
+        if not distances:
+            return 0.0
+        
+        rews = tolerance(
+            np.hstack(distances),
+            bounds=(_TARGET_SPREAD - 0.005, _TARGET_SPREAD + 0.005), # 1 if greater than 1.5 * w_key
+            margin=0.65 * piano_consts.WHITE_KEY_WIDTH, # 0.1 (i.e. default val_at_margin) if 0.65 key lengths away from target
+            sigmoid="gaussian",
+        )
+        return _SPREAD_COEF * float(np.mean(rews))
     
     def distance_finger_to_finger(self, physics, tip1: types.MjcfElement, tip2: types.MjcfElement):
         # xy-plane coords of tips
@@ -331,10 +386,8 @@ class PianoWithOneShadowHand(base.PianoTask):
                 key_geom = self.piano.keys[key].geom[0]
                 key_geom_pos = physics.bind(key_geom).xpos.copy()
                 
-                key_geom_pos[0] += 0.35 * physics.bind(key_geom).size[0]
-
                 # only compute distances in xy plane (finger should hover key)
-                diff = key_geom_pos[:2] - fingertip_pos[:2]
+                diff = key_geom_pos[1] - fingertip_pos[1]
                 distances.append(float(np.linalg.norm(diff)))
             return distances
         

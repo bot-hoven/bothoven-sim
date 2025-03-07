@@ -71,34 +71,40 @@ def twinkle_twinkle_little_star_one_hand() -> midi_file.MidiFile:
 
     seq = music_pb2.NoteSequence()
 
+    seq.notes.add(pitch=76, start_time=0.0, end_time=1000.0, velocity=80, part=2)  # twin
+
     # Add metadata.
     seq.sequence_metadata.title = "Twinkle Twinkle (one hand)"
     seq.sequence_metadata.artist = "robopianist"
 
-    seq.notes.add(pitch=60, start_time=0.0, end_time=0.5, velocity=80, part=0)  # twin
-    seq.notes.add(pitch=60, start_time=0.5, end_time=1.0, velocity=80, part=0)  # kle
-    seq.notes.add(pitch=67, start_time=1.0, end_time=1.5, velocity=80, part=2)  # twin
-    seq.notes.add(pitch=67, start_time=1.5, end_time=2.0, velocity=80, part=2)  # kle
-    seq.notes.add(pitch=69, start_time=2.0, end_time=2.5, velocity=80, part=3)  # lit
-    seq.notes.add(pitch=69, start_time=2.5, end_time=3.0, velocity=80, part=3)  # tle
-    seq.notes.add(pitch=67, start_time=3.0, end_time=4.0, velocity=80, part=2)  # star
+    # seq.notes.add(pitch=60, start_time=0.0, end_time=0.5, velocity=80, part=0)  # twin
+    # seq.notes.add(pitch=60, start_time=0.5, end_time=1.0, velocity=80, part=0)  # kle
+    # seq.notes.add(pitch=67, start_time=1.0, end_time=1.5, velocity=80, part=2)  # twin
+    # seq.notes.add(pitch=67, start_time=1.5, end_time=2.0, velocity=80, part=2)  # kle
+    # seq.notes.add(pitch=69, start_time=2.0, end_time=2.5, velocity=80, part=3)  # lit
+    # seq.notes.add(pitch=69, start_time=2.5, end_time=3.0, velocity=80, part=3)  # tle
+    # seq.notes.add(pitch=67, start_time=3.0, end_time=4.0, velocity=80, part=2)  # star
 
-    seq.notes.add(pitch=65, start_time=4.0, end_time=4.5, velocity=80, part=1)  # how
-    seq.notes.add(pitch=65, start_time=4.5, end_time=5.0, velocity=80, part=1)  # I
-    seq.notes.add(pitch=64, start_time=5.0, end_time=5.5, velocity=80, part=1)  # won
-    seq.notes.add(pitch=64, start_time=5.5, end_time=6.0, velocity=80, part=1)  # der
-    seq.notes.add(pitch=62, start_time=6.0, end_time=6.5, velocity=80, part=0)  # what
-    seq.notes.add(pitch=62, start_time=6.5, end_time=7.0, velocity=80, part=0)  # you
-    seq.notes.add(pitch=60, start_time=7.0, end_time=8.0, velocity=80, part=0)  # are
+    # seq.notes.add(pitch=65, start_time=4.0, end_time=4.5, velocity=80, part=1)  # how
+    # seq.notes.add(pitch=65, start_time=4.5, end_time=5.0, velocity=80, part=1)  # I
+    # seq.notes.add(pitch=64, start_time=5.0, end_time=5.5, velocity=80, part=1)  # won
+    # seq.notes.add(pitch=64, start_time=5.5, end_time=6.0, velocity=80, part=1)  # der
+    # seq.notes.add(pitch=62, start_time=6.0, end_time=6.5, velocity=80, part=0)  # what
+    # seq.notes.add(pitch=62, start_time=6.5, end_time=7.0, velocity=80, part=0)  # you
+    # seq.notes.add(pitch=60, start_time=7.0, end_time=8.0, velocity=80, part=0)  # are
     
-    seq.total_time = 8.0
-    seq.tempos.add(qpm=60)
+    # seq.total_time = 8.0
+    # seq.tempos.add(qpm=60)
 
-    # ---- Add 10 seconds of silence at the beginning ----
-    for note in seq.notes:
-        note.start_time += 10.0
-        note.end_time += 10.0
-    seq.total_time += 10.0
+    # # ---- Add 10 seconds of silence at the beginning ----
+    # # for note in seq.notes:
+    # #     note.start_time += 10.0
+    # #     note.end_time += 10.0
+    # # seq.total_time += 10.0
+    # for note in seq.notes:
+    #     note.start_time += 10000
+    #     note.end_time += 10000
+    # seq.total_time += 10000
 
     return midi_file.MidiFile(seq=seq)
 

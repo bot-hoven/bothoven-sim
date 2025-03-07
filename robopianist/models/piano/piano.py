@@ -99,11 +99,17 @@ class Piano(composer.Entity):
 
     def _add_mjcf_elements(self) -> None:
         # Add cameras.
+        # self._mjcf_root.worldbody.add(
+        #     "camera",
+        #     name="closeup",
+        #     pos="-0.313 0.024 0.455",
+        #     xyaxes="0.003 -1.000 -0.000 0.607 0.002 0.795",
+        # )
         self._mjcf_root.worldbody.add(
             "camera",
-            name="closeup",
-            pos="-0.313 0.024 0.455",
-            xyaxes="0.003 -1.000 -0.000 0.607 0.002 0.795",
+            name="egocentric",
+            pos="0.417 -0.039 0.717",
+            xyaxes="-0.002 1.000 0.000 -0.867 -0.002 0.498",
         )
         self._mjcf_root.worldbody.add(
             "camera",
@@ -111,34 +117,28 @@ class Piano(composer.Entity):
             pos="0.393 -0.791 0.638",
             xyaxes="0.808 0.589 0.000 -0.388 0.533 0.752",
         )
-        self._mjcf_root.worldbody.add(
-            "camera",
-            name="right",
-            pos="0.472 0.598 0.580",
-            xyaxes="-0.637 0.771 -0.000 -0.510 -0.421 0.750",
-        )
-        self._mjcf_root.worldbody.add(
-            "camera",
-            name="back",
-            pos="-0.569 0.008 0.841",
-            xyaxes="-0.009 -1.000 0.000 0.783 -0.007 0.622",
-        )
-        self._mjcf_root.worldbody.add(
-            "camera",
-            name="egocentric",
-            pos="0.417 -0.039 0.717",
-            xyaxes="-0.002 1.000 0.000 -0.867 -0.002 0.498",
-        )
-        pad_y = 0.5
-        distance = 1.0
-        fovy_radians = 2 * np.arctan2(pad_y * self._size[1], distance)
-        self._mjcf_root.worldbody.add(
-            "camera",
-            name="topdown",
-            pos=[0, 0, distance],
-            quat=[1, 0, 0, 1],
-            fovy=np.rad2deg(fovy_radians),
-        )
+        # self._mjcf_root.worldbody.add(
+        #     "camera",
+        #     name="right",
+        #     pos="0.472 0.598 0.580",
+        #     xyaxes="-0.637 0.771 -0.000 -0.510 -0.421 0.750",
+        # )
+        # self._mjcf_root.worldbody.add(
+        #     "camera",
+        #     name="back",
+        #     pos="-0.569 0.008 0.841",
+        #     xyaxes="-0.009 -1.000 0.000 0.783 -0.007 0.622",
+        # )
+        # pad_y = 0.5
+        # distance = 1.0
+        # fovy_radians = 2 * np.arctan2(pad_y * self._size[1], distance)
+        # self._mjcf_root.worldbody.add(
+        #     "camera",
+        #     name="topdown",
+        #     pos=[0, 0, distance],
+        #     quat=[1, 0, 0, 1],
+        #     fovy=np.rad2deg(fovy_radians),
+        # )
 
     # Composer methods.
 

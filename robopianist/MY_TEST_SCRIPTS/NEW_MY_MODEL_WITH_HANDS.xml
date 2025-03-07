@@ -1,0 +1,738 @@
+<mujoco model="stage">
+  <compiler autolimits="true" angle="radian"/>
+  <option timestep="0.0050000000000000001" impratio="10"/>
+  <visual>
+    <global azimuth="180" elevation="-50"/>
+    <scale forcewidth="0.040000000000000001" contactwidth="0.20000000000000001" contactheight="0.029999999999999999"/>
+  </visual>
+  <statistic extent="0.59999999999999998" center="0.20000000000000001 0 0.29999999999999999"/>
+  <default>
+    <default class="/"/>
+    <default class="piano/">
+      <joint type="hinge" axis="0 1 0"/>
+      <geom type="box" contype="0" conaffinity="1" solref="0.01 1"/>
+      <site type="box" group="4" rgba="1 0 0 1"/>
+      <default class="piano/white_key">
+        <joint pos="-0.074999999999999997 0 0" stiffness="2" range="0 0.066568163775823808" springref="-0.017453292519943295" armature="0.001" damping="0.050000000000000003"/>
+        <geom size="0.074999999999999997 0.01125 0.01125" material="piano/white" mass="0.040000000000000001"/>
+        <site size="0.074999999999999997 0.01125 0.01125"/>
+      </default>
+      <default class="piano/black_key">
+        <joint pos="-0.044999999999999998 0 0" stiffness="2" range="0 0.088655881867437475" springref="-0.017453292519943295" armature="0.001" damping="0.050000000000000003"/>
+        <geom size="0.044999999999999998 0.0050000000000000001 0.0089999999999999993" material="piano/black" mass="0.02"/>
+        <site size="0.044999999999999998 0.0050000000000000001 0.0089999999999999993"/>
+      </default>
+    </default>
+    <default class="rh_bothoven_hand/">
+      <joint armature="0.00020000000000000001" damping="0.5" frictionloss="0.01"/>
+      <default class="rh_bothoven_hand/servo">
+        <position ctrlrange="-0.087266499999999997 0.087266499999999997" forcerange="-5 5" kp="3"/>
+      </default>
+      <default class="rh_bothoven_hand/solenoid">
+        <joint damping="0.10000000000000001"/>
+        <position ctrlrange="-0.40000000000000002 0" forcerange="-5 5" kp="3"/>
+      </default>
+      <default class="rh_bothoven_hand/stepper">
+        <joint type="slide" axis="0 1 0" damping="22"/>
+        <position ctrlrange="-2 2" kp="40"/>
+      </default>
+    </default>
+    <default class="lh_bothoven_hand/">
+      <joint armature="0.00020000000000000001" damping="0.5" frictionloss="0.01"/>
+      <default class="lh_bothoven_hand/servo">
+        <position ctrlrange="-0.087266499999999997 0.087266499999999997" forcerange="-5 5" kp="3"/>
+      </default>
+      <default class="lh_bothoven_hand/solenoid">
+        <joint damping="0.10000000000000001"/>
+        <position ctrlrange="-0.40000000000000002 0" forcerange="-5 5" kp="3"/>
+      </default>
+      <default class="lh_bothoven_hand/stepper">
+        <joint type="slide" axis="0 1 0" damping="22"/>
+        <position ctrlrange="-2 2" kp="40"/>
+      </default>
+    </default>
+  </default>
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.10000000000000001 0.10000000000000001 0.10000000000000001" rgb2="0.20000000000000001 0.20000000000000001 0.20000000000000001" width="512" height="512"/>
+    <material name="grid" class="/" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0.20000000000000001"/>
+    <texture name="skybox" type="skybox" builtin="gradient" rgb1="0.20000000000000001 0.20000000000000001 0.20000000000000001" rgb2="0 0 0" mark="random" markrgb="1 1 1" width="800" height="800"/>
+    <material name="piano/white" class="piano/" rgba="0.90000000000000002 0.90000000000000002 0.90000000000000002 1"/>
+    <material name="piano/black" class="piano/" rgba="0.10000000000000001 0.10000000000000001 0.10000000000000001 1"/>
+    <mesh name="rh_bothoven_hand/finger_mount_plate" class="rh_bothoven_hand/" file="finger_mount_plate-ff4ca53afb1a452a59753a41eb10a9fd1453f860.stl"/>
+    <mesh name="rh_bothoven_hand/large_solenoid" class="rh_bothoven_hand/" file="large_solenoid-3fab95806774f91e67801ef73b008e02e2ac7685.stl"/>
+    <mesh name="rh_bothoven_hand/large_finger" class="rh_bothoven_hand/" file="large_finger-183d8947657220334b4dfef37d4857f405fb5d9d.stl"/>
+    <mesh name="rh_bothoven_hand/finger_arm_large" class="rh_bothoven_hand/" file="finger_arm_large-8873c2b856a6b2fe4132d27e15d3dea48db67504.stl"/>
+    <mesh name="lh_bothoven_hand/finger_mount_plate" class="lh_bothoven_hand/" file="finger_mount_plate-ff4ca53afb1a452a59753a41eb10a9fd1453f860.stl"/>
+    <mesh name="lh_bothoven_hand/large_solenoid" class="lh_bothoven_hand/" file="large_solenoid-3fab95806774f91e67801ef73b008e02e2ac7685.stl"/>
+    <mesh name="lh_bothoven_hand/large_finger" class="lh_bothoven_hand/" file="large_finger-183d8947657220334b4dfef37d4857f405fb5d9d.stl"/>
+    <mesh name="lh_bothoven_hand/finger_arm_large" class="lh_bothoven_hand/" file="finger_arm_large-8873c2b856a6b2fe4132d27e15d3dea48db67504.stl"/>
+  </asset>
+  <worldbody>
+    <light name="//unnamed_light_0" class="/" pos="0 0 1"/>
+    <light name="//unnamed_light_1" class="/" directional="false" pos="0.29999999999999999 0 1" dir="0 0 -1"/>
+    <geom name="//unnamed_geom_0" class="/" type="plane" contype="0" conaffinity="0" size="1 1 0.050000000000000003" material="grid"/>
+    <body name="piano/">
+      <body name="piano/base" pos="-0.127 0 0.02">
+        <geom name="piano//unnamed_geom_0" class="piano/" type="box" size="0.050000000000000003 0.61049999999999993 0.02" rgba="0.14999999999999999 0.14999999999999999 0.14999999999999999 1"/>
+      </body>
+      <body name="piano/white_key_0" pos="0 -0.59924999999999995 0.01125">
+        <geom name="piano/white_key_geom_0" class="piano/white_key"/>
+        <joint name="piano/white_joint_0" class="piano/white_key"/>
+        <site name="piano/white_key_site_0" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_1" pos="-0.029999999999999999 -0.58750000000000002 0.026000000000000002">
+        <geom name="piano/black_key_geom_1" class="piano/black_key"/>
+        <joint name="piano/black_joint_1" class="piano/black_key"/>
+        <site name="piano/black_key_site_1" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_2" pos="0 -0.57574999999999998 0.01125">
+        <geom name="piano/white_key_geom_2" class="piano/white_key"/>
+        <joint name="piano/white_joint_2" class="piano/white_key"/>
+        <site name="piano/white_key_site_2" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_3" pos="0 -0.55224999999999991 0.01125">
+        <geom name="piano/white_key_geom_3" class="piano/white_key"/>
+        <joint name="piano/white_joint_3" class="piano/white_key"/>
+        <site name="piano/white_key_site_3" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_4" pos="-0.029999999999999999 -0.53999999999999992 0.026000000000000002">
+        <geom name="piano/black_key_geom_4" class="piano/black_key"/>
+        <joint name="piano/black_joint_4" class="piano/black_key"/>
+        <site name="piano/black_key_site_4" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_5" pos="0 -0.52874999999999994 0.01125">
+        <geom name="piano/white_key_geom_5" class="piano/white_key"/>
+        <joint name="piano/white_joint_5" class="piano/white_key"/>
+        <site name="piano/white_key_site_5" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_6" pos="-0.029999999999999999 -0.51649999999999985 0.026000000000000002">
+        <geom name="piano/black_key_geom_6" class="piano/black_key"/>
+        <joint name="piano/black_joint_6" class="piano/black_key"/>
+        <site name="piano/black_key_site_6" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_7" pos="0 -0.50524999999999998 0.01125">
+        <geom name="piano/white_key_geom_7" class="piano/white_key"/>
+        <joint name="piano/white_joint_7" class="piano/white_key"/>
+        <site name="piano/white_key_site_7" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_8" pos="0 -0.48174999999999996 0.01125">
+        <geom name="piano/white_key_geom_8" class="piano/white_key"/>
+        <joint name="piano/white_joint_8" class="piano/white_key"/>
+        <site name="piano/white_key_site_8" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_9" pos="-0.029999999999999999 -0.46949999999999997 0.026000000000000002">
+        <geom name="piano/black_key_geom_9" class="piano/black_key"/>
+        <joint name="piano/black_joint_9" class="piano/black_key"/>
+        <site name="piano/black_key_site_9" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_10" pos="0 -0.45824999999999994 0.01125">
+        <geom name="piano/white_key_geom_10" class="piano/white_key"/>
+        <joint name="piano/white_joint_10" class="piano/white_key"/>
+        <site name="piano/white_key_site_10" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_11" pos="-0.029999999999999999 -0.4459999999999999 0.026000000000000002">
+        <geom name="piano/black_key_geom_11" class="piano/black_key"/>
+        <joint name="piano/black_joint_11" class="piano/black_key"/>
+        <site name="piano/black_key_site_11" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_12" pos="0 -0.43474999999999997 0.01125">
+        <geom name="piano/white_key_geom_12" class="piano/white_key"/>
+        <joint name="piano/white_joint_12" class="piano/white_key"/>
+        <site name="piano/white_key_site_12" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_13" pos="-0.029999999999999999 -0.42249999999999993 0.026000000000000002">
+        <geom name="piano/black_key_geom_13" class="piano/black_key"/>
+        <joint name="piano/black_joint_13" class="piano/black_key"/>
+        <site name="piano/black_key_site_13" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_14" pos="0 -0.41124999999999995 0.01125">
+        <geom name="piano/white_key_geom_14" class="piano/white_key"/>
+        <joint name="piano/white_joint_14" class="piano/white_key"/>
+        <site name="piano/white_key_site_14" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_15" pos="0 -0.38774999999999993 0.01125">
+        <geom name="piano/white_key_geom_15" class="piano/white_key"/>
+        <joint name="piano/white_joint_15" class="piano/white_key"/>
+        <site name="piano/white_key_site_15" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_16" pos="-0.029999999999999999 -0.37549999999999994 0.026000000000000002">
+        <geom name="piano/black_key_geom_16" class="piano/black_key"/>
+        <joint name="piano/black_joint_16" class="piano/black_key"/>
+        <site name="piano/black_key_site_16" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_17" pos="0 -0.36424999999999996 0.01125">
+        <geom name="piano/white_key_geom_17" class="piano/white_key"/>
+        <joint name="piano/white_joint_17" class="piano/white_key"/>
+        <site name="piano/white_key_site_17" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_18" pos="-0.029999999999999999 -0.35199999999999987 0.026000000000000002">
+        <geom name="piano/black_key_geom_18" class="piano/black_key"/>
+        <joint name="piano/black_joint_18" class="piano/black_key"/>
+        <site name="piano/black_key_site_18" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_19" pos="0 -0.34074999999999994 0.01125">
+        <geom name="piano/white_key_geom_19" class="piano/white_key"/>
+        <joint name="piano/white_joint_19" class="piano/white_key"/>
+        <site name="piano/white_key_site_19" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_20" pos="0 -0.31724999999999992 0.01125">
+        <geom name="piano/white_key_geom_20" class="piano/white_key"/>
+        <joint name="piano/white_joint_20" class="piano/white_key"/>
+        <site name="piano/white_key_site_20" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_21" pos="-0.029999999999999999 -0.30499999999999994 0.026000000000000002">
+        <geom name="piano/black_key_geom_21" class="piano/black_key"/>
+        <joint name="piano/black_joint_21" class="piano/black_key"/>
+        <site name="piano/black_key_site_21" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_22" pos="0 -0.29374999999999996 0.01125">
+        <geom name="piano/white_key_geom_22" class="piano/white_key"/>
+        <joint name="piano/white_joint_22" class="piano/white_key"/>
+        <site name="piano/white_key_site_22" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_23" pos="-0.029999999999999999 -0.28149999999999986 0.026000000000000002">
+        <geom name="piano/black_key_geom_23" class="piano/black_key"/>
+        <joint name="piano/black_joint_23" class="piano/black_key"/>
+        <site name="piano/black_key_site_23" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_24" pos="0 -0.27024999999999993 0.01125">
+        <geom name="piano/white_key_geom_24" class="piano/white_key"/>
+        <joint name="piano/white_joint_24" class="piano/white_key"/>
+        <site name="piano/white_key_site_24" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_25" pos="-0.029999999999999999 -0.2579999999999999 0.026000000000000002">
+        <geom name="piano/black_key_geom_25" class="piano/black_key"/>
+        <joint name="piano/black_joint_25" class="piano/black_key"/>
+        <site name="piano/black_key_site_25" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_26" pos="0 -0.24674999999999997 0.01125">
+        <geom name="piano/white_key_geom_26" class="piano/white_key"/>
+        <joint name="piano/white_joint_26" class="piano/white_key"/>
+        <site name="piano/white_key_site_26" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_27" pos="0 -0.22324999999999995 0.01125">
+        <geom name="piano/white_key_geom_27" class="piano/white_key"/>
+        <joint name="piano/white_joint_27" class="piano/white_key"/>
+        <site name="piano/white_key_site_27" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_28" pos="-0.029999999999999999 -0.21099999999999997 0.026000000000000002">
+        <geom name="piano/black_key_geom_28" class="piano/black_key"/>
+        <joint name="piano/black_joint_28" class="piano/black_key"/>
+        <site name="piano/black_key_site_28" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_29" pos="0 -0.19974999999999993 0.01125">
+        <geom name="piano/white_key_geom_29" class="piano/white_key"/>
+        <joint name="piano/white_joint_29" class="piano/white_key"/>
+        <site name="piano/white_key_site_29" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_30" pos="-0.029999999999999999 -0.18749999999999989 0.026000000000000002">
+        <geom name="piano/black_key_geom_30" class="piano/black_key"/>
+        <joint name="piano/black_joint_30" class="piano/black_key"/>
+        <site name="piano/black_key_site_30" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_31" pos="0 -0.17624999999999996 0.01125">
+        <geom name="piano/white_key_geom_31" class="piano/white_key"/>
+        <joint name="piano/white_joint_31" class="piano/white_key"/>
+        <site name="piano/white_key_site_31" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_32" pos="0 -0.15274999999999994 0.01125">
+        <geom name="piano/white_key_geom_32" class="piano/white_key"/>
+        <joint name="piano/white_joint_32" class="piano/white_key"/>
+        <site name="piano/white_key_site_32" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_33" pos="-0.029999999999999999 -0.14049999999999996 0.026000000000000002">
+        <geom name="piano/black_key_geom_33" class="piano/black_key"/>
+        <joint name="piano/black_joint_33" class="piano/black_key"/>
+        <site name="piano/black_key_site_33" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_34" pos="0 -0.12924999999999998 0.01125">
+        <geom name="piano/white_key_geom_34" class="piano/white_key"/>
+        <joint name="piano/white_joint_34" class="piano/white_key"/>
+        <site name="piano/white_key_site_34" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_35" pos="-0.029999999999999999 -0.11699999999999988 0.026000000000000002">
+        <geom name="piano/black_key_geom_35" class="piano/black_key"/>
+        <joint name="piano/black_joint_35" class="piano/black_key"/>
+        <site name="piano/black_key_site_35" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_36" pos="0 -0.10574999999999996 0.01125">
+        <geom name="piano/white_key_geom_36" class="piano/white_key"/>
+        <joint name="piano/white_joint_36" class="piano/white_key"/>
+        <site name="piano/white_key_site_36" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_37" pos="-0.029999999999999999 -0.093499999999999917 0.026000000000000002">
+        <geom name="piano/black_key_geom_37" class="piano/black_key"/>
+        <joint name="piano/black_joint_37" class="piano/black_key"/>
+        <site name="piano/black_key_site_37" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_38" pos="0 -0.082249999999999934 0.01125">
+        <geom name="piano/white_key_geom_38" class="piano/white_key"/>
+        <joint name="piano/white_joint_38" class="piano/white_key"/>
+        <site name="piano/white_key_site_38" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_39" pos="0 -0.058749999999999969 0.01125">
+        <geom name="piano/white_key_geom_39" class="piano/white_key"/>
+        <joint name="piano/white_joint_39" class="piano/white_key"/>
+        <site name="piano/white_key_site_39" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_40" pos="-0.029999999999999999 -0.046499999999999986 0.026000000000000002">
+        <geom name="piano/black_key_geom_40" class="piano/black_key"/>
+        <joint name="piano/black_joint_40" class="piano/black_key"/>
+        <site name="piano/black_key_site_40" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_41" pos="0 -0.035249999999999893 0.01125">
+        <geom name="piano/white_key_geom_41" class="piano/white_key"/>
+        <joint name="piano/white_joint_41" class="piano/white_key"/>
+        <site name="piano/white_key_site_41" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_42" pos="-0.029999999999999999 -0.022999999999999909 0.026000000000000002">
+        <geom name="piano/black_key_geom_42" class="piano/black_key"/>
+        <joint name="piano/black_joint_42" class="piano/black_key"/>
+        <site name="piano/black_key_site_42" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_43" pos="0 -0.011749999999999927 0.01125">
+        <geom name="piano/white_key_geom_43" class="piano/white_key"/>
+        <joint name="piano/white_joint_43" class="piano/white_key"/>
+        <site name="piano/white_key_site_43" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_44" pos="0 0.011750000000000038 0.01125">
+        <geom name="piano/white_key_geom_44" class="piano/white_key"/>
+        <joint name="piano/white_joint_44" class="piano/white_key"/>
+        <site name="piano/white_key_site_44" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_45" pos="-0.029999999999999999 0.024000000000000021 0.026000000000000002">
+        <geom name="piano/black_key_geom_45" class="piano/black_key"/>
+        <joint name="piano/black_joint_45" class="piano/black_key"/>
+        <site name="piano/black_key_site_45" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_46" pos="0 0.035250000000000004 0.01125">
+        <geom name="piano/white_key_geom_46" class="piano/white_key"/>
+        <joint name="piano/white_joint_46" class="piano/white_key"/>
+        <site name="piano/white_key_site_46" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_47" pos="-0.029999999999999999 0.047500000000000098 0.026000000000000002">
+        <geom name="piano/black_key_geom_47" class="piano/black_key"/>
+        <joint name="piano/black_joint_47" class="piano/black_key"/>
+        <site name="piano/black_key_site_47" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_48" pos="0 0.05875000000000008 0.01125">
+        <geom name="piano/white_key_geom_48" class="piano/white_key"/>
+        <joint name="piano/white_joint_48" class="piano/white_key"/>
+        <site name="piano/white_key_site_48" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_49" pos="-0.029999999999999999 0.071000000000000063 0.026000000000000002">
+        <geom name="piano/black_key_geom_49" class="piano/black_key"/>
+        <joint name="piano/black_joint_49" class="piano/black_key"/>
+        <site name="piano/black_key_site_49" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_50" pos="0 0.082250000000000045 0.01125">
+        <geom name="piano/white_key_geom_50" class="piano/white_key"/>
+        <joint name="piano/white_joint_50" class="piano/white_key"/>
+        <site name="piano/white_key_site_50" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_51" pos="0 0.10575000000000001 0.01125">
+        <geom name="piano/white_key_geom_51" class="piano/white_key"/>
+        <joint name="piano/white_joint_51" class="piano/white_key"/>
+        <site name="piano/white_key_site_51" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_52" pos="-0.029999999999999999 0.11799999999999999 0.026000000000000002">
+        <geom name="piano/black_key_geom_52" class="piano/black_key"/>
+        <joint name="piano/black_joint_52" class="piano/black_key"/>
+        <site name="piano/black_key_site_52" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_53" pos="0 0.12925000000000009 0.01125">
+        <geom name="piano/white_key_geom_53" class="piano/white_key"/>
+        <joint name="piano/white_joint_53" class="piano/white_key"/>
+        <site name="piano/white_key_site_53" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_54" pos="-0.029999999999999999 0.14150000000000007 0.026000000000000002">
+        <geom name="piano/black_key_geom_54" class="piano/black_key"/>
+        <joint name="piano/black_joint_54" class="piano/black_key"/>
+        <site name="piano/black_key_site_54" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_55" pos="0 0.15275000000000005 0.01125">
+        <geom name="piano/white_key_geom_55" class="piano/white_key"/>
+        <joint name="piano/white_joint_55" class="piano/white_key"/>
+        <site name="piano/white_key_site_55" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_56" pos="0 0.17625000000000002 0.01125">
+        <geom name="piano/white_key_geom_56" class="piano/white_key"/>
+        <joint name="piano/white_joint_56" class="piano/white_key"/>
+        <site name="piano/white_key_site_56" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_57" pos="-0.029999999999999999 0.1885 0.026000000000000002">
+        <geom name="piano/black_key_geom_57" class="piano/black_key"/>
+        <joint name="piano/black_joint_57" class="piano/black_key"/>
+        <site name="piano/black_key_site_57" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_58" pos="0 0.19975000000000009 0.01125">
+        <geom name="piano/white_key_geom_58" class="piano/white_key"/>
+        <joint name="piano/white_joint_58" class="piano/white_key"/>
+        <site name="piano/white_key_site_58" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_59" pos="-0.029999999999999999 0.21200000000000008 0.026000000000000002">
+        <geom name="piano/black_key_geom_59" class="piano/black_key"/>
+        <joint name="piano/black_joint_59" class="piano/black_key"/>
+        <site name="piano/black_key_site_59" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_60" pos="0 0.22325000000000006 0.01125">
+        <geom name="piano/white_key_geom_60" class="piano/white_key"/>
+        <joint name="piano/white_joint_60" class="piano/white_key"/>
+        <site name="piano/white_key_site_60" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_61" pos="-0.029999999999999999 0.23550000000000004 0.026000000000000002">
+        <geom name="piano/black_key_geom_61" class="piano/black_key"/>
+        <joint name="piano/black_joint_61" class="piano/black_key"/>
+        <site name="piano/black_key_site_61" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_62" pos="0 0.24675000000000002 0.01125">
+        <geom name="piano/white_key_geom_62" class="piano/white_key"/>
+        <joint name="piano/white_joint_62" class="piano/white_key"/>
+        <site name="piano/white_key_site_62" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_63" pos="0 0.2702500000000001 0.01125">
+        <geom name="piano/white_key_geom_63" class="piano/white_key"/>
+        <joint name="piano/white_joint_63" class="piano/white_key"/>
+        <site name="piano/white_key_site_63" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_64" pos="-0.029999999999999999 0.28250000000000008 0.026000000000000002">
+        <geom name="piano/black_key_geom_64" class="piano/black_key"/>
+        <joint name="piano/black_joint_64" class="piano/black_key"/>
+        <site name="piano/black_key_site_64" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_65" pos="0 0.29375000000000007 0.01125">
+        <geom name="piano/white_key_geom_65" class="piano/white_key"/>
+        <joint name="piano/white_joint_65" class="piano/white_key"/>
+        <site name="piano/white_key_site_65" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_66" pos="-0.029999999999999999 0.30600000000000016 0.026000000000000002">
+        <geom name="piano/black_key_geom_66" class="piano/black_key"/>
+        <joint name="piano/black_joint_66" class="piano/black_key"/>
+        <site name="piano/black_key_site_66" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_67" pos="0 0.31725000000000003 0.01125">
+        <geom name="piano/white_key_geom_67" class="piano/white_key"/>
+        <joint name="piano/white_joint_67" class="piano/white_key"/>
+        <site name="piano/white_key_site_67" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_68" pos="0 0.34075 0.01125">
+        <geom name="piano/white_key_geom_68" class="piano/white_key"/>
+        <joint name="piano/white_joint_68" class="piano/white_key"/>
+        <site name="piano/white_key_site_68" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_69" pos="-0.029999999999999999 0.35299999999999998 0.026000000000000002">
+        <geom name="piano/black_key_geom_69" class="piano/black_key"/>
+        <joint name="piano/black_joint_69" class="piano/black_key"/>
+        <site name="piano/black_key_site_69" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_70" pos="0 0.36425000000000007 0.01125">
+        <geom name="piano/white_key_geom_70" class="piano/white_key"/>
+        <joint name="piano/white_joint_70" class="piano/white_key"/>
+        <site name="piano/white_key_site_70" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_71" pos="-0.029999999999999999 0.37650000000000006 0.026000000000000002">
+        <geom name="piano/black_key_geom_71" class="piano/black_key"/>
+        <joint name="piano/black_joint_71" class="piano/black_key"/>
+        <site name="piano/black_key_site_71" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_72" pos="0 0.38775000000000004 0.01125">
+        <geom name="piano/white_key_geom_72" class="piano/white_key"/>
+        <joint name="piano/white_joint_72" class="piano/white_key"/>
+        <site name="piano/white_key_site_72" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_73" pos="-0.029999999999999999 0.40000000000000002 0.026000000000000002">
+        <geom name="piano/black_key_geom_73" class="piano/black_key"/>
+        <joint name="piano/black_joint_73" class="piano/black_key"/>
+        <site name="piano/black_key_site_73" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_74" pos="0 0.41125 0.01125">
+        <geom name="piano/white_key_geom_74" class="piano/white_key"/>
+        <joint name="piano/white_joint_74" class="piano/white_key"/>
+        <site name="piano/white_key_site_74" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_75" pos="0 0.43475000000000008 0.01125">
+        <geom name="piano/white_key_geom_75" class="piano/white_key"/>
+        <joint name="piano/white_joint_75" class="piano/white_key"/>
+        <site name="piano/white_key_site_75" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_76" pos="-0.029999999999999999 0.44700000000000006 0.026000000000000002">
+        <geom name="piano/black_key_geom_76" class="piano/black_key"/>
+        <joint name="piano/black_joint_76" class="piano/black_key"/>
+        <site name="piano/black_key_site_76" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_77" pos="0 0.45825000000000016 0.01125">
+        <geom name="piano/white_key_geom_77" class="piano/white_key"/>
+        <joint name="piano/white_joint_77" class="piano/white_key"/>
+        <site name="piano/white_key_site_77" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_78" pos="-0.029999999999999999 0.47050000000000014 0.026000000000000002">
+        <geom name="piano/black_key_geom_78" class="piano/black_key"/>
+        <joint name="piano/black_joint_78" class="piano/black_key"/>
+        <site name="piano/black_key_site_78" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_79" pos="0 0.48175000000000001 0.01125">
+        <geom name="piano/white_key_geom_79" class="piano/white_key"/>
+        <joint name="piano/white_joint_79" class="piano/white_key"/>
+        <site name="piano/white_key_site_79" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_80" pos="0 0.50525000000000009 0.01125">
+        <geom name="piano/white_key_geom_80" class="piano/white_key"/>
+        <joint name="piano/white_joint_80" class="piano/white_key"/>
+        <site name="piano/white_key_site_80" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_81" pos="-0.029999999999999999 0.51750000000000007 0.026000000000000002">
+        <geom name="piano/black_key_geom_81" class="piano/black_key"/>
+        <joint name="piano/black_joint_81" class="piano/black_key"/>
+        <site name="piano/black_key_site_81" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_82" pos="0 0.52875000000000016 0.01125">
+        <geom name="piano/white_key_geom_82" class="piano/white_key"/>
+        <joint name="piano/white_joint_82" class="piano/white_key"/>
+        <site name="piano/white_key_site_82" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_83" pos="-0.029999999999999999 0.54100000000000015 0.026000000000000002">
+        <geom name="piano/black_key_geom_83" class="piano/black_key"/>
+        <joint name="piano/black_joint_83" class="piano/black_key"/>
+        <site name="piano/black_key_site_83" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_84" pos="0 0.55225000000000002 0.01125">
+        <geom name="piano/white_key_geom_84" class="piano/white_key"/>
+        <joint name="piano/white_joint_84" class="piano/white_key"/>
+        <site name="piano/white_key_site_84" class="piano/white_key"/>
+      </body>
+      <body name="piano/black_key_85" pos="-0.029999999999999999 0.56450000000000011 0.026000000000000002">
+        <geom name="piano/black_key_geom_85" class="piano/black_key"/>
+        <joint name="piano/black_joint_85" class="piano/black_key"/>
+        <site name="piano/black_key_site_85" class="piano/black_key"/>
+      </body>
+      <body name="piano/white_key_86" pos="0 0.5757500000000001 0.01125">
+        <geom name="piano/white_key_geom_86" class="piano/white_key"/>
+        <joint name="piano/white_joint_86" class="piano/white_key"/>
+        <site name="piano/white_key_site_86" class="piano/white_key"/>
+      </body>
+      <body name="piano/white_key_87" pos="0 0.59924999999999995 0.01125">
+        <geom name="piano/white_key_geom_87" class="piano/white_key"/>
+        <joint name="piano/white_joint_87" class="piano/white_key"/>
+        <site name="piano/white_key_site_87" class="piano/white_key"/>
+      </body>
+      <camera name="piano/egocentric" class="piano/" pos="0.41699999999999998 -0.039 0.71699999999999997" xyaxes="-0.002 1 0 -0.86699999999999999 -0.002 0.498"/>
+      <camera name="piano/left" class="piano/" pos="0.39300000000000002 -0.79100000000000004 0.63800000000000001" xyaxes="0.80800000000000005 0.58899999999999997 0 -0.38800000000000001 0.53300000000000003 0.752"/>
+    </body>
+    <body name="rh_bothoven_hand/">
+      <body name="rh_bothoven_hand/finger_mount_plate" pos="0.14249999999999999 0.14999999999999999 0.029999999999999999" axisangle="0 0 1 3.1415926000000001" gravcomp="1">
+        <inertial pos="-0.0016837499999999999 1.42762e-06 0.0021065300000000001" quat="0.50038800000000005 0.50039900000000004 -0.49959999999999999 0.499612" mass="0.11340600000000001" diaginertia="0.000426403 0.00029322199999999999 0.00013425899999999999"/>
+        <geom name="rh_bothoven_hand//unnamed_geom_0" class="rh_bothoven_hand/" type="mesh" rgba="0.231373 0.38039200000000001 0.70588200000000001 1" pos="0.0023499300000000001 0.0338035 -0.0218" quat="1 0 0 0" mesh="rh_bothoven_hand/finger_mount_plate"/>
+        <body name="rh_bothoven_hand/large_finger_1" pos="0.0253238 0.075003500000000001 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.023476199999999999 -0.021307599999999999" quat="0.69750199999999996 0.71658299999999997 8.2486199999999996e-05 -0.000163368" mass="0.55984199999999995" diaginertia="0.00019837199999999999 0.00018045299999999999 7.9346100000000003e-05"/>
+          <joint name="rh_bothoven_hand/Finger_Mount1" class="rh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_1" class="rh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.0243745 -0.035999999999999997" quat="0 0 0 1" mesh="rh_bothoven_hand/large_solenoid"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_2" class="rh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="rh_bothoven_hand/large_finger"/>
+          <body name="rh_bothoven_hand/finger_arm_large_1" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="rh_bothoven_hand/Finger_Arm1" class="rh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="rh_bothoven_hand//unnamed_geom_3" class="rh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="rh_bothoven_hand/finger_arm_large"/>
+            <site name="rh_bothoven_hand/tip_site_1" class="rh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="rh_bothoven_hand/Finger_Arm1_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="rh_bothoven_hand/touch_site_1" class="rh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="rh_bothoven_hand/Finger_Mount1_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="rh_bothoven_hand/large_finger_2" pos="0.0253238 0.037503500000000002 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.022992100000000001 -0.021307599999999999" quat="0.69716900000000004 0.71690699999999996 8.2230699999999999e-05 -0.00016334100000000001" mass="0.55984199999999995" diaginertia="0.000196873 0.000178958 7.9342099999999994e-05"/>
+          <joint name="rh_bothoven_hand/Finger_Mount2" class="rh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_4" class="rh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.027625500000000001 -0.035999999999999997" quat="1 0 0 0" mesh="rh_bothoven_hand/large_solenoid"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_5" class="rh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="rh_bothoven_hand/large_finger"/>
+          <body name="rh_bothoven_hand/finger_arm_large_2" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="rh_bothoven_hand/Finger_Arm2" class="rh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="rh_bothoven_hand//unnamed_geom_6" class="rh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="rh_bothoven_hand/finger_arm_large"/>
+            <site name="rh_bothoven_hand/tip_site_2" class="rh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="rh_bothoven_hand/Finger_Arm2_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="rh_bothoven_hand/touch_site_2" class="rh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="rh_bothoven_hand/Finger_Mount2_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="rh_bothoven_hand/large_finger_3" pos="0.0253238 3.5176399999999998e-06 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.022992100000000001 -0.021307599999999999" quat="0.69716900000000004 0.71690699999999996 8.2230699999999999e-05 -0.00016334100000000001" mass="0.55984199999999995" diaginertia="0.000196873 0.000178958 7.9342099999999994e-05"/>
+          <joint name="rh_bothoven_hand/Finger_Mount3" class="rh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_7" class="rh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="rh_bothoven_hand/large_finger"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_8" class="rh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.027625500000000001 -0.035999999999999997" quat="1 0 0 0" mesh="rh_bothoven_hand/large_solenoid"/>
+          <body name="rh_bothoven_hand/finger_arm_large_3" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="rh_bothoven_hand/Finger_Arm3" class="rh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="rh_bothoven_hand//unnamed_geom_9" class="rh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="rh_bothoven_hand/finger_arm_large"/>
+            <site name="rh_bothoven_hand/tip_site_3" class="rh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="rh_bothoven_hand/Finger_Arm3_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="rh_bothoven_hand/touch_site_3" class="rh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="rh_bothoven_hand/Finger_Mount3_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="rh_bothoven_hand/large_finger_4" pos="0.0253238 -0.037496500000000002 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.023476199999999999 -0.021307599999999999" quat="0.69750199999999996 0.71658299999999997 8.2486199999999996e-05 -0.000163368" mass="0.55984199999999995" diaginertia="0.00019837199999999999 0.00018045299999999999 7.9346100000000003e-05"/>
+          <joint name="rh_bothoven_hand/Finger_Mount4" class="rh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_10" class="rh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="rh_bothoven_hand/large_finger"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_11" class="rh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.0243745 -0.0070000000000000001" quat="0 1 0 0" mesh="rh_bothoven_hand/large_solenoid"/>
+          <body name="rh_bothoven_hand/finger_arm_large_4" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="rh_bothoven_hand/Finger_Arm4" class="rh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="rh_bothoven_hand//unnamed_geom_12" class="rh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="rh_bothoven_hand/finger_arm_large"/>
+            <site name="rh_bothoven_hand/tip_site_4" class="rh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="rh_bothoven_hand/Finger_Arm4_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="rh_bothoven_hand/touch_site_4" class="rh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="rh_bothoven_hand/Finger_Mount4_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="rh_bothoven_hand/large_finger_5" pos="0.0253238 -0.074996499999999994 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.022992100000000001 -0.021307599999999999" quat="0.69716900000000004 0.71690699999999996 8.2230699999999999e-05 -0.00016334100000000001" mass="0.55984199999999995" diaginertia="0.000196873 0.000178958 7.9342099999999994e-05"/>
+          <joint name="rh_bothoven_hand/Finger_Mount5" class="rh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_13" class="rh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.027625500000000001 -0.035999999999999997" quat="1 0 0 0" mesh="rh_bothoven_hand/large_solenoid"/>
+          <geom name="rh_bothoven_hand//unnamed_geom_14" class="rh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="rh_bothoven_hand/large_finger"/>
+          <body name="rh_bothoven_hand/finger_arm_large_5" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="rh_bothoven_hand/Finger_Arm5" class="rh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="rh_bothoven_hand//unnamed_geom_15" class="rh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="rh_bothoven_hand/finger_arm_large"/>
+            <site name="rh_bothoven_hand/tip_site_5" class="rh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="rh_bothoven_hand/Finger_Arm5_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="rh_bothoven_hand/touch_site_5" class="rh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="rh_bothoven_hand/Finger_Mount5_site" class="rh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+      </body>
+    </body>
+    <body name="lh_bothoven_hand/">
+      <body name="lh_bothoven_hand/finger_mount_plate" pos="0.14249999999999999 -0.14999999999999999 0.029999999999999999" axisangle="0 0 1 3.1415926000000001" gravcomp="1">
+        <inertial pos="-0.0016837499999999999 1.42762e-06 0.0021065300000000001" quat="0.50038800000000005 0.50039900000000004 -0.49959999999999999 0.499612" mass="0.11340600000000001" diaginertia="0.000426403 0.00029322199999999999 0.00013425899999999999"/>
+        <geom name="lh_bothoven_hand//unnamed_geom_0" class="lh_bothoven_hand/" type="mesh" rgba="0.231373 0.38039200000000001 0.70588200000000001 1" pos="0.0023499300000000001 0.0338035 -0.0218" quat="1 0 0 0" mesh="lh_bothoven_hand/finger_mount_plate"/>
+        <body name="lh_bothoven_hand/large_finger_1" pos="0.0253238 0.075003500000000001 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.023476199999999999 -0.021307599999999999" quat="0.69750199999999996 0.71658299999999997 8.2486199999999996e-05 -0.000163368" mass="0.55984199999999995" diaginertia="0.00019837199999999999 0.00018045299999999999 7.9346100000000003e-05"/>
+          <joint name="lh_bothoven_hand/Finger_Mount1" class="lh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_1" class="lh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.0243745 -0.035999999999999997" quat="0 0 0 1" mesh="lh_bothoven_hand/large_solenoid"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_2" class="lh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="lh_bothoven_hand/large_finger"/>
+          <body name="lh_bothoven_hand/finger_arm_large_1" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="lh_bothoven_hand/Finger_Arm1" class="lh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="lh_bothoven_hand//unnamed_geom_3" class="lh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="lh_bothoven_hand/finger_arm_large"/>
+            <site name="lh_bothoven_hand/tip_site_1" class="lh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="lh_bothoven_hand/Finger_Arm1_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="lh_bothoven_hand/touch_site_1" class="lh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="lh_bothoven_hand/Finger_Mount1_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="lh_bothoven_hand/large_finger_2" pos="0.0253238 0.037503500000000002 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.022992100000000001 -0.021307599999999999" quat="0.69716900000000004 0.71690699999999996 8.2230699999999999e-05 -0.00016334100000000001" mass="0.55984199999999995" diaginertia="0.000196873 0.000178958 7.9342099999999994e-05"/>
+          <joint name="lh_bothoven_hand/Finger_Mount2" class="lh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_4" class="lh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.027625500000000001 -0.035999999999999997" quat="1 0 0 0" mesh="lh_bothoven_hand/large_solenoid"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_5" class="lh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="lh_bothoven_hand/large_finger"/>
+          <body name="lh_bothoven_hand/finger_arm_large_2" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="lh_bothoven_hand/Finger_Arm2" class="lh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="lh_bothoven_hand//unnamed_geom_6" class="lh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="lh_bothoven_hand/finger_arm_large"/>
+            <site name="lh_bothoven_hand/tip_site_2" class="lh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="lh_bothoven_hand/Finger_Arm2_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="lh_bothoven_hand/touch_site_2" class="lh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="lh_bothoven_hand/Finger_Mount2_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="lh_bothoven_hand/large_finger_3" pos="0.0253238 3.5176399999999998e-06 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.022992100000000001 -0.021307599999999999" quat="0.69716900000000004 0.71690699999999996 8.2230699999999999e-05 -0.00016334100000000001" mass="0.55984199999999995" diaginertia="0.000196873 0.000178958 7.9342099999999994e-05"/>
+          <joint name="lh_bothoven_hand/Finger_Mount3" class="lh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_7" class="lh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="lh_bothoven_hand/large_finger"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_8" class="lh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.027625500000000001 -0.035999999999999997" quat="1 0 0 0" mesh="lh_bothoven_hand/large_solenoid"/>
+          <body name="lh_bothoven_hand/finger_arm_large_3" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="lh_bothoven_hand/Finger_Arm3" class="lh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="lh_bothoven_hand//unnamed_geom_9" class="lh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="lh_bothoven_hand/finger_arm_large"/>
+            <site name="lh_bothoven_hand/tip_site_3" class="lh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="lh_bothoven_hand/Finger_Arm3_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="lh_bothoven_hand/touch_site_3" class="lh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="lh_bothoven_hand/Finger_Mount3_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="lh_bothoven_hand/large_finger_4" pos="0.0253238 -0.037496500000000002 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.023476199999999999 -0.021307599999999999" quat="0.69750199999999996 0.71658299999999997 8.2486199999999996e-05 -0.000163368" mass="0.55984199999999995" diaginertia="0.00019837199999999999 0.00018045299999999999 7.9346100000000003e-05"/>
+          <joint name="lh_bothoven_hand/Finger_Mount4" class="lh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_10" class="lh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="lh_bothoven_hand/large_finger"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_11" class="lh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.0243745 -0.0070000000000000001" quat="0 1 0 0" mesh="lh_bothoven_hand/large_solenoid"/>
+          <body name="lh_bothoven_hand/finger_arm_large_4" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="lh_bothoven_hand/Finger_Arm4" class="lh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="lh_bothoven_hand//unnamed_geom_12" class="lh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="lh_bothoven_hand/finger_arm_large"/>
+            <site name="lh_bothoven_hand/tip_site_4" class="lh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="lh_bothoven_hand/Finger_Arm4_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="lh_bothoven_hand/touch_site_4" class="lh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="lh_bothoven_hand/Finger_Mount4_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+        <body name="lh_bothoven_hand/large_finger_5" pos="0.0253238 -0.074996499999999994 0.0050000000000000001" quat="0 0.70710700000000004 -0.70710700000000004 0" gravcomp="1">
+          <inertial pos="-4.7069900000000002e-07 0.022992100000000001 -0.021307599999999999" quat="0.69716900000000004 0.71690699999999996 8.2230699999999999e-05 -0.00016334100000000001" mass="0.55984199999999995" diaginertia="0.000196873 0.000178958 7.9342099999999994e-05"/>
+          <joint name="lh_bothoven_hand/Finger_Mount5" class="lh_bothoven_hand/" pos="0 0 0" axis="0 0 1" range="-0.087266499999999997 0.087266499999999997"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_13" class="lh_bothoven_hand/" type="mesh" rgba="0.98039200000000004 0.71372599999999997 0.0039215700000000001 1" pos="0 0.027625500000000001 -0.035999999999999997" quat="1 0 0 0" mesh="lh_bothoven_hand/large_solenoid"/>
+          <geom name="lh_bothoven_hand//unnamed_geom_14" class="lh_bothoven_hand/" type="mesh" rgba="0.76862699999999995 0.88627500000000003 0.95294100000000004 1" pos="0 0.0077593999999999996 0" quat="0 1 0 0" mesh="lh_bothoven_hand/large_finger"/>
+          <body name="lh_bothoven_hand/finger_arm_large_5" pos="0.0025000000000000001 -0.029631600000000001 -0.046303999999999998" quat="0.5 -0.5 0.5 -0.5" gravcomp="1">
+            <inertial pos="0.051327200000000003 -0.0021301599999999999 -0.0025000199999999999" quat="0.024296100000000001 0.70668900000000001 -0.024296100000000001 0.70668900000000001" mass="0.0079727200000000008" diaginertia="1.16167e-05 1.1105500000000001e-05 5.4316500000000003e-07"/>
+            <joint name="lh_bothoven_hand/Finger_Arm5" class="lh_bothoven_hand/solenoid" pos="0 0 0" axis="0 0 1" range="-0.52359900000000004 0"/>
+            <geom name="lh_bothoven_hand//unnamed_geom_15" class="lh_bothoven_hand/" type="mesh" rgba="0.972549 0.52941199999999999 0.0039215700000000001 1" pos="0.063368300000000002 -5.4787300000000003e-05 -0.0050000000000000001" quat="1 0 0 0" mesh="lh_bothoven_hand/finger_arm_large"/>
+            <site name="lh_bothoven_hand/tip_site_5" class="lh_bothoven_hand/" type="sphere" group="4" rgba="1 0.51400000000000001 0.88600000000000001 0.59999999999999998" size="0.0040000000000000001" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+            <site name="lh_bothoven_hand/Finger_Arm5_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+            <site name="lh_bothoven_hand/touch_site_5" class="lh_bothoven_hand/" type="sphere" group="4" rgba="0 1 0 0.59999999999999998" size="0.01" pos="0.1045 -0.025000000000000001 -0.0025000000000000001"/>
+          </body>
+          <site name="lh_bothoven_hand/Finger_Mount5_site" class="lh_bothoven_hand/" type="box" group="4" rgba="0 1 0 1" size="0.001 0.001 0.001"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <position name="rh_bothoven_hand/servo_1" class="rh_bothoven_hand/servo" joint="rh_bothoven_hand/Finger_Mount1"/>
+    <position name="rh_bothoven_hand/solenoid_1" class="rh_bothoven_hand/solenoid" joint="rh_bothoven_hand/Finger_Arm1"/>
+    <position name="rh_bothoven_hand/servo_2" class="rh_bothoven_hand/servo" joint="rh_bothoven_hand/Finger_Mount2"/>
+    <position name="rh_bothoven_hand/solenoid_2" class="rh_bothoven_hand/solenoid" joint="rh_bothoven_hand/Finger_Arm2"/>
+    <position name="rh_bothoven_hand/servo_3" class="rh_bothoven_hand/servo" joint="rh_bothoven_hand/Finger_Mount3"/>
+    <position name="rh_bothoven_hand/solenoid_3" class="rh_bothoven_hand/solenoid" joint="rh_bothoven_hand/Finger_Arm3"/>
+    <position name="rh_bothoven_hand/servo_4" class="rh_bothoven_hand/servo" joint="rh_bothoven_hand/Finger_Mount4"/>
+    <position name="rh_bothoven_hand/solenoid_4" class="rh_bothoven_hand/solenoid" joint="rh_bothoven_hand/Finger_Arm4"/>
+    <position name="rh_bothoven_hand/servo_5" class="rh_bothoven_hand/servo" joint="rh_bothoven_hand/Finger_Mount5"/>
+    <position name="rh_bothoven_hand/solenoid_5" class="rh_bothoven_hand/solenoid" joint="rh_bothoven_hand/Finger_Arm5"/>
+    <position name="lh_bothoven_hand/servo_1" class="lh_bothoven_hand/servo" joint="lh_bothoven_hand/Finger_Mount1"/>
+    <position name="lh_bothoven_hand/solenoid_1" class="lh_bothoven_hand/solenoid" joint="lh_bothoven_hand/Finger_Arm1"/>
+    <position name="lh_bothoven_hand/servo_2" class="lh_bothoven_hand/servo" joint="lh_bothoven_hand/Finger_Mount2"/>
+    <position name="lh_bothoven_hand/solenoid_2" class="lh_bothoven_hand/solenoid" joint="lh_bothoven_hand/Finger_Arm2"/>
+    <position name="lh_bothoven_hand/servo_3" class="lh_bothoven_hand/servo" joint="lh_bothoven_hand/Finger_Mount3"/>
+    <position name="lh_bothoven_hand/solenoid_3" class="lh_bothoven_hand/solenoid" joint="lh_bothoven_hand/Finger_Arm3"/>
+    <position name="lh_bothoven_hand/servo_4" class="lh_bothoven_hand/servo" joint="lh_bothoven_hand/Finger_Mount4"/>
+    <position name="lh_bothoven_hand/solenoid_4" class="lh_bothoven_hand/solenoid" joint="lh_bothoven_hand/Finger_Arm4"/>
+    <position name="lh_bothoven_hand/servo_5" class="lh_bothoven_hand/servo" joint="lh_bothoven_hand/Finger_Mount5"/>
+    <position name="lh_bothoven_hand/solenoid_5" class="lh_bothoven_hand/solenoid" joint="lh_bothoven_hand/Finger_Arm5"/>
+  </actuator>
+  <sensor>
+    <torque name="rh_bothoven_hand/Finger_Mount1_torque" site="rh_bothoven_hand/Finger_Mount1_site"/>
+    <torque name="rh_bothoven_hand/Finger_Arm1_torque" site="rh_bothoven_hand/Finger_Arm1_site"/>
+    <torque name="rh_bothoven_hand/Finger_Mount2_torque" site="rh_bothoven_hand/Finger_Mount2_site"/>
+    <torque name="rh_bothoven_hand/Finger_Arm2_torque" site="rh_bothoven_hand/Finger_Arm2_site"/>
+    <torque name="rh_bothoven_hand/Finger_Mount3_torque" site="rh_bothoven_hand/Finger_Mount3_site"/>
+    <torque name="rh_bothoven_hand/Finger_Arm3_torque" site="rh_bothoven_hand/Finger_Arm3_site"/>
+    <torque name="rh_bothoven_hand/Finger_Mount4_torque" site="rh_bothoven_hand/Finger_Mount4_site"/>
+    <torque name="rh_bothoven_hand/Finger_Arm4_torque" site="rh_bothoven_hand/Finger_Arm4_site"/>
+    <torque name="rh_bothoven_hand/Finger_Mount5_torque" site="rh_bothoven_hand/Finger_Mount5_site"/>
+    <torque name="rh_bothoven_hand/Finger_Arm5_torque" site="rh_bothoven_hand/Finger_Arm5_site"/>
+    <touch name="rh_bothoven_hand/1_touch" site="rh_bothoven_hand/touch_site_1"/>
+    <touch name="rh_bothoven_hand/2_touch" site="rh_bothoven_hand/touch_site_2"/>
+    <touch name="rh_bothoven_hand/3_touch" site="rh_bothoven_hand/touch_site_3"/>
+    <touch name="rh_bothoven_hand/4_touch" site="rh_bothoven_hand/touch_site_4"/>
+    <touch name="rh_bothoven_hand/5_touch" site="rh_bothoven_hand/touch_site_5"/>
+    <torque name="lh_bothoven_hand/Finger_Mount1_torque" site="lh_bothoven_hand/Finger_Mount1_site"/>
+    <torque name="lh_bothoven_hand/Finger_Arm1_torque" site="lh_bothoven_hand/Finger_Arm1_site"/>
+    <torque name="lh_bothoven_hand/Finger_Mount2_torque" site="lh_bothoven_hand/Finger_Mount2_site"/>
+    <torque name="lh_bothoven_hand/Finger_Arm2_torque" site="lh_bothoven_hand/Finger_Arm2_site"/>
+    <torque name="lh_bothoven_hand/Finger_Mount3_torque" site="lh_bothoven_hand/Finger_Mount3_site"/>
+    <torque name="lh_bothoven_hand/Finger_Arm3_torque" site="lh_bothoven_hand/Finger_Arm3_site"/>
+    <torque name="lh_bothoven_hand/Finger_Mount4_torque" site="lh_bothoven_hand/Finger_Mount4_site"/>
+    <torque name="lh_bothoven_hand/Finger_Arm4_torque" site="lh_bothoven_hand/Finger_Arm4_site"/>
+    <torque name="lh_bothoven_hand/Finger_Mount5_torque" site="lh_bothoven_hand/Finger_Mount5_site"/>
+    <torque name="lh_bothoven_hand/Finger_Arm5_torque" site="lh_bothoven_hand/Finger_Arm5_site"/>
+    <touch name="lh_bothoven_hand/1_touch" site="lh_bothoven_hand/touch_site_1"/>
+    <touch name="lh_bothoven_hand/2_touch" site="lh_bothoven_hand/touch_site_2"/>
+    <touch name="lh_bothoven_hand/3_touch" site="lh_bothoven_hand/touch_site_3"/>
+    <touch name="lh_bothoven_hand/4_touch" site="lh_bothoven_hand/touch_site_4"/>
+    <touch name="lh_bothoven_hand/5_touch" site="lh_bothoven_hand/touch_site_5"/>
+  </sensor>
+</mujoco>
