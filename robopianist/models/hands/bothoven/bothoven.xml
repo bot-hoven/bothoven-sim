@@ -14,7 +14,7 @@
     <default class="solenoid">
       <joint damping="0.1"/>
       <!-- <position kp="3" ctrlrange="-0.523599 0" forcerange="-5 5"/> -->
-      <position kp="3" ctrlrange="-0.45 0" forcerange="-5 5"/>
+      <position kp="3" ctrlrange="-0.4 0" forcerange="-5 5"/>
     </default>
     
     <default class="stepper">
@@ -94,6 +94,8 @@
   </worldbody>
 
   <actuator>
+    <position name="stepper" joint="base_link_to_base" class="stepper"/>
+    
     <position name="servo_1" joint="Finger_Mount1" class="servo"/>
     <position name="solenoid_1" joint="Finger_Arm1" class="solenoid"/>
 
@@ -109,6 +111,5 @@
     <position name="servo_5" joint="Finger_Mount5" class="servo"/>
     <position name="solenoid_5" joint="Finger_Arm5" class="solenoid"/>
 
-    <position name="stepper" joint="base_link_to_base" class="stepper"/>
   </actuator>
 </mujoco>

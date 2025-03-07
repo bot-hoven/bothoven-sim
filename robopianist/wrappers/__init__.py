@@ -15,9 +15,11 @@
 from robopianist.wrappers.evaluation import MidiEvaluationWrapper
 from robopianist.wrappers.pixels import PixelWrapper
 from robopianist.wrappers.sound import PianoSoundVideoWrapper
+from robopianist.wrappers.bothoven_solenoid_observation import BothovenSolenoidObservationWrapper
 
 __all__ = [
     "MidiEvaluationWrapper",
     "PianoSoundVideoWrapper",
     "PixelWrapper",
+    "BothovenSolenoidObservationWrapper",
 ]
