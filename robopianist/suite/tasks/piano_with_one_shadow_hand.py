@@ -39,9 +39,10 @@ _FINGERS_TOO_CLOSE = 0.022 # meters (this is default resting position, need to e
 _TARGET_SPREAD = 1.75 * piano_consts.WHITE_KEY_WIDTH
 
 # Reward weighting coefficients.
-_ENERGY_PENALTY_COEF = 5e-3
+_ENERGY_PENALTY_COEF = 0.01
 _FINGER_DIST_COEF = 0.5
 _SPREAD_COEF = 0.2
+_FINGER_TO_KEY_COEF = 1.5
 
 # Discrete action indicies.
 _DISCRETE_IDXS = np.array([3, 5, 7, 9])
@@ -129,9 +130,9 @@ class PianoWithOneShadowHand(base.PianoTask):
             key_press_reward=self._compute_key_press_reward,
             sustain_reward=self._compute_sustain_reward,
             energy_reward=self._compute_energy_reward,
-            spread_reward=self._bothoven_spread_from_key,
+            # spread_reward=self._bothoven_spread_from_key,
             # bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
-            # bothoven_action_change_penalty=self._bothoven_action_change_penalty,
+            bothoven_action_change_penalty=self._bothoven_action_change_penalty,
         )
         if not self._disable_fingering_reward:
             self._reward_fn.add("fingering_reward", self._bothoven_compute_fingering_reward)
@@ -282,8 +283,8 @@ class PianoWithOneShadowHand(base.PianoTask):
         del physics # not used
         if self._prev_action is None:
             return 0.0
-        # -0.5 penalty for each discrete actions change
-        alpha = 0.2
+        # -0.05 penalty for each discrete actions change
+        alpha = 0.05
         if self._use_bothoven:
             return -alpha * np.sum(self._prev_action[_BOTHOVEN_DISCRETE_IDXS] != self._curr_action[_BOTHOVEN_DISCRETE_IDXS])
         return -alpha * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS]) # for reduced shadow hands
@@ -400,7 +401,7 @@ class PianoWithOneShadowHand(base.PianoTask):
             margin=(_FINGER_CLOSE_ENOUGH_TO_KEY * 10),
             sigmoid="gaussian",
         )
-        return float(np.mean(rews))
+        return _FINGER_TO_KEY_COEF * float(np.mean(rews))
 
     def _compute_fingering_reward(self, physics) -> float:
         """Reward for minimizing the distance between the fingers and the keys."""

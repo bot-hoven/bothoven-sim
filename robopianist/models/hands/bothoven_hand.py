@@ -84,8 +84,9 @@ class BothovenHand(base.Hand):
         self._fingertip_sites = tuple(fingertip_sites)
 
         # Add joint torque sensors.
+        non_solenoid_joints = [j for j in self._joints if j.name[:-1] != "Finger_Arm" ]
         joint_torque_sensors = []
-        for joint_elem in self._joints:
+        for joint_elem in non_solenoid_joints:
             # add site to body that each joint is attached to 
             # joint_elem.parent gives the body that the joint is UNDER (inside of)
             site_elem = joint_elem.parent.add(
@@ -110,9 +111,10 @@ class BothovenHand(base.Hand):
         self._joint_torque_sensors = tuple(joint_torque_sensors)
 
         # Add velocity and force sensors to the actuators.
+        non_solenoid_acts = [j for j in self._actuators if j.name[:-2] != "solenoid" ]
         actuator_velocity_sensors = []
         actuator_force_sensors = []
-        for actuator_elem in self._actuators:
+        for actuator_elem in non_solenoid_acts:
             # Add actuatorvel tags to the sensors section of the MJCF
             velocity_sensor_elem = self._mjcf_root.sensor.add(
                 "actuatorvel",

@@ -53,9 +53,9 @@ r_hand_joints = r_hand.find_all("joint", exclude_attachments=True)
 r_hand_actuators = r_hand.find_all("actuator", exclude_attachments=True)
 
 # remove actuators
-for act in r_hand_actuators:
-    act.remove()
-env.task.right_hand._actuators = tuple()
+# for act in r_hand_actuators:
+#     act.remove()
+# env.task.right_hand._actuators = tuple()
 
 # remove stepper joint
 # r_hand_joints[0].remove()
@@ -75,14 +75,14 @@ print(actuators)
 
 first_go = True
 count = 0
-prev_action = None
+prev_action = np.zeros(action_spec.shape)
 
 def random_policy(time_step):
     global count, prev_action, first_go
 
     if first_go:
         first_go = False
-        return np.array([0])
+        return prev_action
 
     if count % 1 == 0:
         # prev_action = np.random.uniform(low=-1.0,
@@ -93,18 +93,17 @@ def random_policy(time_step):
         # prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
         # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
         # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
-
-        prev_action = np.zeros(action_spec.shape)
         
         print(f"Timestep {count}:")
         spread_rew = env.task._bothoven_spread_from_key(env.physics)
         fingering_rew = env.task._bothoven_compute_fingering_reward(env.physics)
+        energy_rew = env.task._compute_energy_reward(env.physics)
         print(f"Spread Rew: {spread_rew}")
         print(f"Fingering Rew: {fingering_rew}")
+        print(f"Energy Rew: {energy_rew}")
         print()
     count += 1
-    arr = [0]
-    return np.array(arr)
+    return prev_action
 
 viewer.launch(env, policy=random_policy)
 
