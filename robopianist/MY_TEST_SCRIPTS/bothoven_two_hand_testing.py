@@ -17,9 +17,9 @@ def scale_action_vector(action_vector, minimum, maximum):
     return minimum + (action_vector + 1) * 0.5 * (maximum - minimum)
 
 env = suite.load(
-    environment_name="RoboPianist-debug-TwinkleTwinkleLittleStar-v0",
+    environment_name="RoboPianist-debug-RCM_MaryHadALittleLamb-v0",
     seed=42,
-    right_hand_only=True,
+    # right_hand_only=True,
     task_kwargs=dict(
         n_steps_lookahead=0,
         trim_silence=True,
@@ -61,14 +61,14 @@ r_hand_actuators = r_hand.find_all("actuator", exclude_attachments=True)
 # r_hand_joints[0].remove()
 # env.task.right_hand._joints = tuple(r_hand_joints[1:])
 
-joints = np.array(env.task._hand.joints)
-actuators = np.array(env.task._hand.actuators)
+joints = np.array(env.task.right_hand.joints)
+actuators = np.array(env.task.right_hand.actuators)
 
 print()
 print(joints)
 print(actuators)
 
-rh_forearm_tx_idx = [i for i,a in enumerate(r_hand_actuators) if a.name == "stepper"][0]
+# rh_forearm_tx_idx = [i for i,a in enumerate(r_hand_actuators) if a.name == "stepper"][0]
 # lh_forearm_tx_idx = len(r_hand_actuators) + rh_forearm_tx_idx
 
 # joint_positions = env.physics.bind(r_hand_joints).qpos
@@ -84,7 +84,7 @@ def random_policy(time_step):
         first_go = False
         return prev_action
 
-    if count % 150 == 0:
+    if count % 1 == 0:
         # prev_action = np.random.uniform(low=-1.0,
         #                         high=1.0,
         #                         size=action_spec.shape)
@@ -93,13 +93,7 @@ def random_policy(time_step):
         # prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
         # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
         # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
-        prev_action = np.zeros(action_spec.shape)
-        prev_action[up_down_idxs] = -1
-        prev_action[up_down_idxs[0]] = 1
-        print(prev_action)
-        prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
-        prev_action[rh_forearm_tx_idx] = 0 # rh forearms
-
+        
         print(f"Timestep {count}:")
         # spread_rew = env.task._bothoven_spread_from_key(env.physics)
         # fingering_rew = env.task._bothoven_compute_fingering_reward(env.physics)
@@ -107,7 +101,7 @@ def random_policy(time_step):
         # print(f"Spread Rew: {spread_rew}")
         # print(f"Fingering Rew: {fingering_rew}")
         # print(f"Energy Rew: {energy_rew}")
-        # print()
+        print()
     count += 1
     return prev_action
 

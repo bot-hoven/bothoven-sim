@@ -42,7 +42,7 @@ _TARGET_SPREAD = 1.75 * piano_consts.WHITE_KEY_WIDTH
 _ENERGY_PENALTY_COEF = 0.01
 _FINGER_DIST_COEF = 0.5
 _SPREAD_COEF = 0.2
-_FINGER_TO_KEY_COEF = 1.5
+_FINGER_TO_KEY_COEF = 1
 
 # Discrete action indicies.
 _DISCRETE_IDXS = np.array([3, 5, 7, 9])
@@ -284,7 +284,7 @@ class PianoWithOneShadowHand(base.PianoTask):
         if self._prev_action is None:
             return 0.0
         # -0.05 penalty for each discrete actions change
-        alpha = 0.05
+        alpha = 0.01
         if self._use_bothoven:
             return -alpha * np.sum(self._prev_action[_BOTHOVEN_DISCRETE_IDXS] != self._curr_action[_BOTHOVEN_DISCRETE_IDXS])
         return -alpha * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS]) # for reduced shadow hands

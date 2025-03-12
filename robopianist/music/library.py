@@ -547,8 +547,12 @@ def nocturne_rousseau() -> midi_file.MidiFile:
     return midi
 
 def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
+    # midi = midi_file.MidiFile.from_file(
+    #     _DATA_PATH / "rcm" / "mary_had_a_little_lamb.mid"
+    # )
+
     midi = midi_file.MidiFile.from_file(
-        _DATA_PATH / "rcm" / "mary_had_a_little_lamb.mid"
+        _DATA_PATH / "rcm" / "LOWER_LEFT_mary_had_a_little_lamb.mid"
     )
 
     # Add metadata.
@@ -595,8 +599,8 @@ def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
         7,  # 18: D4  (LH M)
         2,  # 19: E5  (RH M)
         7,  # 20: D4  (LH M)
-        4,  # 21: G5  (RH P)
-        4,  # 22: G5  (RH P)
+        3,  # 21: G5  (RH P)
+        3,  # 22: G5  (RH P)
         6,  # 23: E4  (LH F)
         5,  # 24: G4  (LH T)
         2,  # 25: E5  (RH M)
@@ -628,6 +632,67 @@ def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
         6,  # 50: D4  (LH F)
         7,  # 51: C4  (LH M)
     ]
+
+    # Fingerings for shadow hands:
+    # FINGERING = [
+    #     #  Line : Finger
+    #     #  (RH = 0..4, LH = 5..9)
+
+    #     # lines 0..75
+    #     2,  # 0:  E5  (RH M)
+    #     1,  # 1:  D5  (RH F)
+    #     0,  # 2:  C5  (RH T)
+    #     5,  # 3:  E4  (LH T)
+    #     1,  # 4:  D5  (RH F)
+    #     6,  # 5:  D4  (LH F)
+    #     2,  # 6:  E5  (RH M)
+    #     7,  # 7:  C4  (LH M)
+    #     2,  # 8:  E5  (RH M)
+    #     6,  # 9:  D4  (LH F)
+    #     2,  # 10: E5  (RH M)
+    #     5,  # 11: E4  (LH T)
+    #     5,  # 12: E4  (LH T)
+    #     1,  # 13: D5  (RH F)
+    #     5,  # 14: E4  (LH T)
+    #     1,  # 15: D5  (RH F)
+    #     1,  # 16: D5  (RH F)
+    #     7,  # 17: D4  (LH M)
+    #     7,  # 18: D4  (LH M)
+    #     2,  # 19: E5  (RH M)
+    #     7,  # 20: D4  (LH M)
+    #     4,  # 21: G5  (RH P)
+    #     4,  # 22: G5  (RH P)
+    #     6,  # 23: E4  (LH F)
+    #     5,  # 24: G4  (LH T)
+    #     2,  # 25: E5  (RH M)
+    #     5,  # 26: G4  (LH T)
+    #     1,  # 27: D5  (RH F)
+    #     0,  # 28: C5  (RH T)
+    #     6,  # 29: E4  (LH F)
+    #     1,  # 30: D5  (RH F)
+    #     7,  # 31: D4  (LH M)
+    #     2,  # 32: E5  (RH M)
+    #     8,  # 33: C4  (LH R)
+    #     2,  # 34: E5  (RH M)
+    #     7,  # 35: D4  (LH M)
+    #     2,  # 36: E5  (RH M)
+    #     6,  # 37: E4  (LH F)
+    #     2,  # 38: E5  (RH M)
+    #     6,  # 39: E4  (LH F)
+    #     1,  # 40: D5  (RH F)
+    #     6,  # 41: E4  (LH F)
+    #     1,  # 42: D5  (RH F)
+    #     6,  # 43: E4  (LH F)
+    #     2,  # 44: E5  (RH M)
+    #     7,  # 45: D4  (LH M)
+    #     1,  # 46: D5  (RH F)
+    #     7,  # 47: D4  (LH M)
+    #     2,  # 49: E5  (RH M)
+    #     0,  # 48: C5  (RH T)
+    #     5,  # 49: E4  (LH T)
+    #     6,  # 50: D4  (LH F)
+    #     7,  # 51: C4  (LH M)
+    # ]
 
     # Sort by start_time (ascending) and pitch (descending)
     sorted_notes = sorted(

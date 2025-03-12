@@ -30,12 +30,13 @@ class BothovenHand(base.Hand):
                 the fingertip colliders or the true meshes. Using primitive colliders
                 speeds up the simulation.
         """
-        xml_file = consts.BOTHOVEN_HAND_XML
 
         if side == base.HandSide.RIGHT:
             self._prefix = "rh_"
+            xml_file = consts.RIGHT_BOTHOVEN_HAND_XML
         elif side == base.HandSide.LEFT:
             self._prefix = "lh_"
+            xml_file = consts.LEFT_BOTHOVEN_HAND_XML
         
         name = name or self._prefix + "bothoven_hand" # e.g. rh_bothoven_hand
 

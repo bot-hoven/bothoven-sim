@@ -27,19 +27,24 @@ from dm_env import specs
 from mujoco_utils import collision_utils, spec_utils, types
 
 import robopianist.models.hands.shadow_hand_constants as hand_consts
+import robopianist.models.piano.piano_constants as piano_consts
 from robopianist.models.arenas import stage
 from robopianist.music import midi_file
 from robopianist.suite import composite_reward
 from robopianist.suite.tasks import base
 
 # Distance thresholds for the shaping reward.
-_FINGER_CLOSE_ENOUGH_TO_KEY = 0.01
+_FINGER_CLOSE_ENOUGH_TO_KEY = 0.005
 _KEY_CLOSE_ENOUGH_TO_PRESSED = 0.05
 _FINGERS_TOO_CLOSE = 0.022 # meters (this is default resting position, need to encourage more spread)
+_TARGET_SPREAD = 1.75 * piano_consts.WHITE_KEY_WIDTH
 
 # Reward weighting coefficients.
-_ENERGY_PENALTY_COEF = 5e-3
-_FINGER_DIST_COEF = 0.25
+_ENERGY_PENALTY_COEF = 0.01
+_FINGER_DIST_COEF = 0.5
+_SPREAD_COEF = 0.2
+_FINGER_TO_KEY_COEF = 1
+_KEY_PRESS_COEF = 1.5
 
 # Transparency of fingertip geoms.
 _FINGERTIP_ALPHA = 1.0
@@ -49,6 +54,8 @@ _POSITION_OFFSET = 0.05
 
 # Discrete action indicies.
 _DISCRETE_IDXS = np.array([3, 5, 7, 9, 14, 16, 18, 20])
+_BOTHOVEN_DISCRETE_IDXS = np.array([2, 4, 6, 8, 10, 13, 15, 17, 19, 21]) # for our hands
+
 
 class PianoWithShadowHands(base.PianoTask):
     def __init__(
@@ -121,6 +128,7 @@ class PianoWithShadowHands(base.PianoTask):
         self._augmentations = augmentations
         self._energy_penalty_coef = energy_penalty_coef
         self._randomize_hand_positions = randomize_hand_positions
+        self._use_bothoven = kwargs['use_bothoven_hand']
 
         # For computing discrete action change frequency penalty
         self._curr_action = None
@@ -140,7 +148,8 @@ class PianoWithShadowHands(base.PianoTask):
             key_press_reward=self._compute_key_press_reward,
             sustain_reward=self._compute_sustain_reward,
             energy_reward=self._compute_energy_reward,
-            bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
+            # spread_reward=self._bothoven_spread_from_key,
+            # bothoven_finger_distance_reward=self._bothoven_finger_distance_reward,
             bothoven_action_change_penalty=self._bothoven_action_change_penalty,
         )
         if not self._disable_fingering_reward:
@@ -308,19 +317,19 @@ class PianoWithShadowHands(base.PianoTask):
                 margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10),
                 sigmoid="gaussian",
             )
-            # rew += 0.5 * rews.mean()
-            rew += rews.mean()
+            rew += 0.5 * rews.mean()
+            # rew += rews.mean()
         
         off = np.flatnonzero(1 - self._goal_current[:-1])
 
         # Remove 0.2 reward for every wrong key press. If all true positive keys are
         # pressed at given timestep, rew from key proper key presses equals 1. Thus,
         # if somehow also 10 FPs, will get reward -1 at that timestep.
-        rew -= 0.4*float(np.sum(self.piano.activation[off]))
+        # rew -= 0.4*float(np.sum(self.piano.activation[off]))
 
         # If there are any false positives, the remaining 0.5 reward is lost.
-        # rew += 0.5 * (1 - float(self.piano.activation[off].any()))
-        return rew
+        rew += 0.5 * (1 - float(self.piano.activation[off].any()))
+        return _KEY_PRESS_COEF * rew
     
     def _bothoven_action_change_penalty(self, physics) -> float:
         """
@@ -333,8 +342,11 @@ class PianoWithShadowHands(base.PianoTask):
         del physics # not used
         if self._prev_action is None:
             return 0.0
-        # -0.5 penalty for each discrete actions change
-        return -0.05 * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS])
+        # -alpha penalty for each discrete actions change
+        alpha = 0.01
+        if self._use_bothoven:
+            return -alpha * np.sum(self._prev_action[_BOTHOVEN_DISCRETE_IDXS] != self._curr_action[_BOTHOVEN_DISCRETE_IDXS])
+        return -alpha * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS])
 
     def _bothoven_finger_distance_reward(self, physics) -> float:
         """
@@ -356,7 +368,7 @@ class PianoWithShadowHands(base.PianoTask):
         rews = tolerance(
             np.hstack(distances),
             bounds=(0, _FINGERS_TOO_CLOSE),
-            margin=1.5*_FINGERS_TOO_CLOSE, # Note that margin is in addition to bounds. So, tolerance == 0.1 when 2 x 0.022 
+            margin=2*_FINGERS_TOO_CLOSE, # Note that margin is in addition to bounds. So, tolerance == 0.1 when 2 x 0.022 
             sigmoid="gaussian",
         )
         # return float(np.mean(rews))
@@ -377,10 +389,8 @@ class PianoWithShadowHands(base.PianoTask):
                 key_geom = self.piano.keys[key].geom[0]
                 key_geom_pos = physics.bind(key_geom).xpos.copy()
                 
-                key_geom_pos[0] += 0.35 * physics.bind(key_geom).size[0]
-
                 # only compute distances in xy plane (finger should hover key)
-                diff = key_geom_pos[:2] - fingertip_pos[:2]
+                diff = key_geom_pos[1:] - fingertip_pos[1:]
                 distances.append(float(np.linalg.norm(diff)))
             return distances
         
@@ -400,7 +410,7 @@ class PianoWithShadowHands(base.PianoTask):
             margin=(_FINGER_CLOSE_ENOUGH_TO_KEY * 10),
             sigmoid="gaussian",
         )
-        return float(np.mean(rews))
+        return _FINGER_TO_KEY_COEF * float(np.mean(rews))
 
     def _compute_fingering_reward(self, physics: mjcf.Physics) -> float:
         """Reward for minimizing the distance between the fingers and the keys."""
@@ -559,8 +569,11 @@ class PianoWithShadowHands(base.PianoTask):
             for i, body in enumerate(hand.fingertip_bodies):
                 color = hand_consts.FINGERTIP_COLORS[i] + (_FINGERTIP_ALPHA,)
                 for geom in body.find_all("geom"):
-                    if geom.dclass.dclass == "plastic_visual":
-                        geom.rgba = color
+                    if not self._use_bothoven:
+                        if geom.dclass.dclass == "plastic_visual":
+                            geom.rgba = color
+                    else:
+                        geom.rgba = color # only one geom in finger_arm_large_N body
                 # Also color the fingertip sites.
                 hand.fingertip_sites[i].rgba = color
 

@@ -2,12 +2,12 @@
     "configuration": "default",
     "documentId": "aad42bbee8b53052c6a2e74e",
     "documentMicroversion": "319300dc5e2da7675ac0aff9",
-    "elementId": "4f85ae5ca9262e4de1669e83",
+    "elementId": "12385789b0e9697bf43d1da0",
     "fullConfiguration": "default",
-    "id": "M1gXZOy5/r6h+xC5m",
+    "id": "MkUJvbAXuNEiti1Tk",
     "isStandardContent": false,
-    "name": "Finger Mount Plate <1>",
-    "partId": "J9D",
+    "name": "Servo <1>",
+    "partId": "JFD",
     "suppressed": false,
     "type": "Part"
 }

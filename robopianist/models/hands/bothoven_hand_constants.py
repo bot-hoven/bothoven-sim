@@ -15,4 +15,5 @@ FINGER_ARM_BODIES: Tuple[str, ...] = (
     "finger_arm_large_5", # pinky (rightmost on right hand)
 )
 
-BOTHOVEN_HAND_XML = _HERE / "bothoven" / "bothoven.xml"
+RIGHT_BOTHOVEN_HAND_XML = _HERE / "bothoven" / "bothoven_right.xml"
+LEFT_BOTHOVEN_HAND_XML = _HERE / "bothoven" / "bothoven_left.xml"
