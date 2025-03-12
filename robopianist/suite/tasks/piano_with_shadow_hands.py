@@ -377,10 +377,9 @@ class PianoWithShadowHands(base.PianoTask):
                 key_geom = self.piano.keys[key].geom[0]
                 key_geom_pos = physics.bind(key_geom).xpos.copy()
                 
-                key_geom_pos[0] += 0.35 * physics.bind(key_geom).size[0]
-
                 # only compute distances in xy plane (finger should hover key)
-                diff = key_geom_pos[:2] - fingertip_pos[:2]
+                diff = key_geom_pos[1:] - fingertip_pos[1:]
+
                 distances.append(float(np.linalg.norm(diff)))
             return distances
         

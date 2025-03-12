@@ -33,6 +33,7 @@
   <worldbody>
     <body name="finger_mount_plate" axisangle="0 0 1 3.1415926">
       <inertial pos="-0.00168375 1.42762e-06 0.00210653" quat="0.500388 0.500399 -0.4996 0.499612" mass="0.113406" diaginertia="0.000426403 0.000293222 0.000134259"/>
+      <joint class="stepper" name="base_link_to_base" pos="0 0 0" axis="0 1 0" type="slide" range="-2 2" />
       <geom pos="0.00234993 0.0338035 -0.0218" quat="1 0 0 0" type="mesh" rgba="0.231373 0.380392 0.705882 1" mesh="finger_mount_plate"/>
       <body name="large_finger_1" pos="0.0253238 0.0750035 0.005" quat="0 0.707107 -0.707107 0">
         <inertial pos="-4.70699e-07 0.0234762 -0.0213076" quat="0.697502 0.716583 8.24862e-05 -0.000163368" mass="0.559842" diaginertia="0.000198372 0.000180453 7.93461e-05"/>

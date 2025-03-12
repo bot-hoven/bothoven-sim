@@ -97,9 +97,9 @@ def random_policy(time_step):
         prev_action = np.zeros(action_spec.shape)
         
         print(f"Timestep {count}:")
-        spread_rew = env.task._bothoven_spread_from_key(env.physics)
+        # spread_rew = env.task._bothoven_spread_from_key(env.physics)
         fingering_rew = env.task._bothoven_compute_fingering_reward(env.physics)
-        print(f"Spread Rew: {spread_rew}")
+        # print(f"Spread Rew: {spread_rew}")
         print(f"Fingering Rew: {fingering_rew}")
         print()
     count += 1
