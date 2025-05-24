@@ -34,17 +34,17 @@ from robopianist.suite import composite_reward
 from robopianist.suite.tasks import base
 
 # Distance thresholds for the shaping reward.
-_FINGER_CLOSE_ENOUGH_TO_KEY = 0.005
+_FINGER_CLOSE_ENOUGH_TO_KEY = 0.0075
 _KEY_CLOSE_ENOUGH_TO_PRESSED = 0.05
 _FINGERS_TOO_CLOSE = 0.022 # meters (this is default resting position, need to encourage more spread)
 _TARGET_SPREAD = 1.75 * piano_consts.WHITE_KEY_WIDTH
 
 # Reward weighting coefficients.
-_ENERGY_PENALTY_COEF = 0.01
+_ENERGY_PENALTY_COEF = 0.02
 _FINGER_DIST_COEF = 0.5
 _SPREAD_COEF = 0.2
-_FINGER_TO_KEY_COEF = 1
-_KEY_PRESS_COEF = 1.5
+_FINGER_TO_KEY_COEF = 1.5
+_KEY_PRESS_COEF = 1
 
 # Transparency of fingertip geoms.
 _FINGERTIP_ALPHA = 1.0
@@ -287,7 +287,7 @@ class PianoWithShadowHands(base.PianoTask):
         return tolerance(
             self._goal_current[-1] - self.piano.sustain_activation[0],
             bounds=(0, _KEY_CLOSE_ENOUGH_TO_PRESSED),
-            margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10),
+            margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 20),
             sigmoid="gaussian",
         )
 
@@ -317,36 +317,47 @@ class PianoWithShadowHands(base.PianoTask):
                 margin=(_KEY_CLOSE_ENOUGH_TO_PRESSED * 10),
                 sigmoid="gaussian",
             )
-            rew += 0.5 * rews.mean()
-            # rew += rews.mean()
+            # rew += 0.5 * rews.mean()
+            rew += 1.25*rews.mean()
         
         off = np.flatnonzero(1 - self._goal_current[:-1])
 
         # Remove 0.2 reward for every wrong key press. If all true positive keys are
         # pressed at given timestep, rew from key proper key presses equals 1. Thus,
         # if somehow also 10 FPs, will get reward -1 at that timestep.
-        # rew -= 0.4*float(np.sum(self.piano.activation[off]))
+        rew -= 1*float(np.sum(self.piano.activation[off]))
 
         # If there are any false positives, the remaining 0.5 reward is lost.
-        rew += 0.5 * (1 - float(self.piano.activation[off].any()))
+        # rew += 0.7 * (1 - float(self.piano.activation[off].any()))
         return _KEY_PRESS_COEF * rew
     
     def _bothoven_action_change_penalty(self, physics) -> float:
         """
-        For every discrete action change, enact a penalty. If the action
-        is truly good, the reward from a correct key press will out-weigh
+        Penalize only when a discrete action changes from 0 to 0.523599.
+        If the action is truly good, the reward from a correct key press will out-weigh
         the state change penalty (rewards are computed at 20Hz, so if
         the finger stays down on the correct key, much more reward will be
         obtained than lost).
         """
-        del physics # not used
+        del physics  # not used
         if self._prev_action is None:
             return 0.0
-        # -alpha penalty for each discrete actions change
-        alpha = 0.01
+        
+        # -alpha penalty for each discrete action change from 0 to 0.523599
+        alpha = 0.05
+        tolerance = 1e-6  # tolerance for floating-point comparisons
+        
         if self._use_bothoven:
-            return -alpha * np.sum(self._prev_action[_BOTHOVEN_DISCRETE_IDXS] != self._curr_action[_BOTHOVEN_DISCRETE_IDXS])
-        return -alpha * np.sum(self._prev_action[_DISCRETE_IDXS] != self._curr_action[_DISCRETE_IDXS])
+            indices = _BOTHOVEN_DISCRETE_IDXS
+        else:
+            indices = _DISCRETE_IDXS
+
+        changes = np.sum(
+            (np.isclose(self._prev_action[indices], 0.0, atol=tolerance)) & 
+            (self._curr_action[indices] > tolerance)  # Current action is positive (solenoid active)
+        )
+        
+        return -alpha * changes
 
     def _bothoven_finger_distance_reward(self, physics) -> float:
         """
@@ -388,6 +399,7 @@ class PianoWithShadowHands(base.PianoTask):
                 fingertip_pos = physics.bind(fingertip_site).xpos.copy()
                 key_geom = self.piano.keys[key].geom[0]
                 key_geom_pos = physics.bind(key_geom).xpos.copy()
+                key_geom_pos[-1] += 0.5 * physics.bind(key_geom).size[2]
                 
                 # only compute distances in xy plane (finger should hover key)
                 diff = key_geom_pos[1:] - fingertip_pos[1:]

@@ -33,7 +33,7 @@ from robopianist.suite import composite_reward
 from robopianist.suite.tasks import base
 
 # Distance thresholds for the shaping reward.
-_FINGER_CLOSE_ENOUGH_TO_KEY = 0.005
+_FINGER_CLOSE_ENOUGH_TO_KEY = 0.01
 _KEY_CLOSE_ENOUGH_TO_PRESSED = 0.05
 _FINGERS_TOO_CLOSE = 0.022 # meters (this is default resting position, need to encourage more spread)
 _TARGET_SPREAD = 1.75 * piano_consts.WHITE_KEY_WIDTH
@@ -380,9 +380,10 @@ class PianoWithOneShadowHand(base.PianoTask):
                 fingertip_pos = physics.bind(fingertip_site).xpos.copy()
                 key_geom = self.piano.keys[key].geom[0]
                 key_geom_pos = physics.bind(key_geom).xpos.copy()
+                key_geom_pos[-1] += 0.5 * physics.bind(key_geom).size[2]
                 
                 # only compute distances in xy plane (finger should hover key)
-                diff = key_geom_pos[1] - fingertip_pos[1]
+                diff = key_geom_pos[1:] - fingertip_pos[1:]
                 distances.append(float(np.linalg.norm(diff)))
             return distances
         

@@ -65,6 +65,30 @@ def toy(right_finger: int = 1, left_finger: int = 6) -> midi_file.MidiFile:
     seq.tempos.add(qpm=60)
     return midi_file.MidiFile(seq=seq)
 
+def long_note_test() -> midi_file.MidiFile:
+    seq = music_pb2.NoteSequence()
+
+    # Right hand.
+    seq.notes.add(
+        start_time=0.0,
+        end_time=1000,
+        velocity=80,
+        pitch=midi_file.note_name_to_midi_number("C8"),
+        part=0,
+    )
+
+    # seq.notes.add(
+    #     start_time=0.0,
+    #     end_time=1000,
+    #     velocity=80,
+    #     pitch=midi_file.note_name_to_midi_number("C4"),
+    #     part=5,
+    # )
+
+    seq.total_time = 1000
+    seq.tempos.add(qpm=60)
+    return midi_file.MidiFile(seq=seq)
+
 
 def twinkle_twinkle_little_star_one_hand() -> midi_file.MidiFile:
     """Simple "Twinkle Twinkle Little Star" for the right hand."""
@@ -581,18 +605,18 @@ def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
         2,  # 0:  E5  (RH M)
         1,  # 1:  D5  (RH F)
         0,  # 2:  C5  (RH T)
-        5,  # 3:  E4  (LH T)
+        6,  # 3:  E4  (LH T)
         1,  # 4:  D5  (RH F)
-        6,  # 5:  D4  (LH F)
+        7,  # 5:  D4  (LH F)
         2,  # 6:  E5  (RH M)
-        7,  # 7:  C4  (LH M)
+        8,  # 7:  C4  (LH M)
         2,  # 8:  E5  (RH M)
-        6,  # 9:  D4  (LH F)
+        7,  # 9:  D4  (LH F)
         2,  # 10: E5  (RH M)
-        5,  # 11: E4  (LH T)
-        5,  # 12: E4  (LH T)
+        6,  # 11: E4  (LH T)
+        6,  # 12: E4  (LH T)
         1,  # 13: D5  (RH F)
-        5,  # 14: E4  (LH T)
+        6,  # 14: E4  (LH T)
         1,  # 15: D5  (RH F)
         1,  # 16: D5  (RH F)
         7,  # 17: D4  (LH M)
@@ -628,9 +652,9 @@ def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
         7,  # 47: D4  (LH M)
         2,  # 49: E5  (RH M)
         0,  # 48: C5  (RH T)
-        5,  # 49: E4  (LH T)
-        6,  # 50: D4  (LH F)
-        7,  # 51: C4  (LH M)
+        6,  # 49: E4  (LH T)
+        7,  # 50: D4  (LH F)
+        8,  # 51: C4  (LH M)
     ]
 
     # Fingerings for shadow hands:
@@ -708,6 +732,60 @@ def rcm_marry_had_a_little_lamb() -> midi_file.MidiFile:
 
     return midi
 
+def fur_elise() -> midi_file.MidiFile:
+    midi = midi_file.MidiFile.from_file(
+        _DATA_PATH / "rcm" / "fur_elise.mid"
+    )
+
+    # Add metadata.
+    midi.seq.sequence_metadata.artist = "Beethoven"
+    midi.seq.sequence_metadata.title = "Fur Elise"
+
+    # Sort by start_time (ascending) and pitch (descending)
+    sorted_notes = sorted(
+        midi.seq.notes,
+        key=lambda note: (note.start_time, -note.pitch)  # Sorting by start_time, then pitch
+    )
+
+    FINGERING = [
+        4,  # E5 (rh_pinky)
+        3,  # D#5 (rh_ring)
+        4,  # E5 (rh_pinky)
+        3,  # D#5 (rh_ring)
+        4,  # E5 (rh_pinky)
+        2,  # B4 (rh_middle)
+        3,  # D5 (rh_ring)
+        2,  # C5 (rh_middle)
+        1,  # A4 (rh_index)
+        9,  # A2 (lh_pinky)
+        7,  # E3 (lh_middle)
+        5,  # A3 (lh_thumb)
+        0,  # C4 (rh_thumb)
+        1,  # E4 (rh_index)
+        3,  # A4 (rh_ring)
+        4,  # B4 (rh_pinky)
+        9,  # E2 (lh_pinky)
+        6,  # E3 (lh_index)
+        5,  # G#3 (lh_thumb)
+        0,  # D4 (rh_thumb)
+        3,  # C5 (rh_ring)
+        3,  # B4 (rh_ring)
+        3,  # C5 (rh_middle)
+        2,  # A4 (rh_index)
+        0,  # E4 (rh_thumb)
+        9,  # A2 (lh_pinky)
+        7,  # E3 (lh_middle)
+        5,  # A3 (lh_thumb)
+    ]
+
+
+    assert len(FINGERING) == len(sorted_notes)
+
+    for i, note in enumerate(sorted_notes):
+        # print(f"{i}:\tStart Time: {round(note.start_time, 4)}\tNote: {midi_file.midi_number_to_note_name(note.pitch)},\tFinger: {FINGERING[i]}")
+        note.part = FINGERING[i]
+
+    return midi
 
 MIDI_NAME_TO_CALLABLE: Dict[str, Callable[[], midi_file.MidiFile]] = {
     "TwinkleTwinkleLittleStar": twinkle_twinkle_little_star_one_hand,
@@ -719,4 +797,6 @@ MIDI_NAME_TO_CALLABLE: Dict[str, Callable[[], midi_file.MidiFile]] = {
     "TwinkleTwinkleRousseau": twinkle_twinkle_rousseau,
     "NocturneRousseau": nocturne_rousseau,
     "RCM_MaryHadALittleLamb": rcm_marry_had_a_little_lamb,
+    "LongNoteTest": long_note_test,
+    "FurElise": fur_elise,
 }

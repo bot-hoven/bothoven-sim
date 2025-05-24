@@ -99,24 +99,24 @@ class Piano(composer.Entity):
 
     def _add_mjcf_elements(self) -> None:
         # Add cameras.
-        # self._mjcf_root.worldbody.add(
-        #     "camera",
-        #     name="closeup",
-        #     pos="-0.313 0.024 0.455",
-        #     xyaxes="0.003 -1.000 -0.000 0.607 0.002 0.795",
-        # )
+        self._mjcf_root.worldbody.add(
+            "camera",
+            name="closeup",
+            pos="-0.313 0.024 0.455",
+            xyaxes="0.003 -1.000 -0.000 0.607 0.002 0.795",
+        )
         self._mjcf_root.worldbody.add(
             "camera",
             name="egocentric",
             pos="0.417 -0.039 0.717",
             xyaxes="-0.002 1.000 0.000 -0.867 -0.002 0.498",
         )
-        self._mjcf_root.worldbody.add(
-            "camera",
-            name="left",
-            pos="0.393 -0.791 0.638",
-            xyaxes="0.808 0.589 0.000 -0.388 0.533 0.752",
-        )
+        # self._mjcf_root.worldbody.add(
+        #     "camera",
+        #     name="left",
+        #     pos="0.393 -0.791 0.638",
+        #     xyaxes="0.808 0.589 0.000 -0.388 0.533 0.752",
+        # )
         # self._mjcf_root.worldbody.add(
         #     "camera",
         #     name="right",

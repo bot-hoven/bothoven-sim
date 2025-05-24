@@ -17,9 +17,9 @@ def scale_action_vector(action_vector, minimum, maximum):
     return minimum + (action_vector + 1) * 0.5 * (maximum - minimum)
 
 env = suite.load(
-    environment_name="RoboPianist-debug-RCM_MaryHadALittleLamb-v0",
+    environment_name="RoboPianist-debug-LongNoteTest-v0",
     seed=42,
-    # right_hand_only=True,
+    right_hand_only=True,
     task_kwargs=dict(
         n_steps_lookahead=0,
         trim_silence=True,
@@ -27,6 +27,7 @@ env = suite.load(
         bothoven_reduced_action_space=True,
         change_color_on_activation=True,
         use_bothoven_hand=True,
+        # disable_colorization=True,
     ),
 )
 
@@ -68,17 +69,18 @@ print()
 print(joints)
 print(actuators)
 
-# rh_forearm_tx_idx = [i for i,a in enumerate(r_hand_actuators) if a.name == "stepper"][0]
-# lh_forearm_tx_idx = len(r_hand_actuators) + rh_forearm_tx_idx
+rh_forearm_tx_idx = [i for i,a in enumerate(r_hand_actuators) if a.name == "stepper"][0]
+lh_forearm_tx_idx = len(r_hand_actuators) + rh_forearm_tx_idx
 
 # joint_positions = env.physics.bind(r_hand_joints).qpos
 
 first_go = True
 count = 0
 prev_action = np.zeros(action_spec.shape)
+temp_action = np.zeros(action_spec.shape)
 
 def random_policy(time_step):
-    global count, prev_action, first_go
+    global count, prev_action, first_go, temp_action
 
     if first_go:
         first_go = False
@@ -93,13 +95,31 @@ def random_policy(time_step):
         # prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
         # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
         # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
+        # prev_action[7] = 0.087266
+        # temp_action[rh_forearm_tx_idx] = 1.00
+        # prev_action[lh_forearm_tx_idx] = 0.05
+
+        # temp_action[up_down_idxs[0]] = 1
+        # temp_action[up_down_idxs[1]] = 1
+        # temp_action[up_down_idxs[2]] = 1
+        # temp_action[up_down_idxs[3]] = 1
+        # temp_action[up_down_idxs[4]] = 1
+
+        # temp_action = scale_action_vector(temp_action, action_spec.minimum, action_spec.maximum)
+
+        # prev_action[up_down_idxs[0]] = temp_action[up_down_idxs[0]]
+        # prev_action[up_down_idxs[1]] = temp_action[up_down_idxs[1]]
+        # prev_action[up_down_idxs[2]] = temp_action[up_down_idxs[2]]
+        # prev_action[up_down_idxs[3]] = temp_action[up_down_idxs[3]]
+        # prev_action[up_down_idxs[4]] = temp_action[up_down_idxs[4]]
+        # prev_action[rh_forearm_tx_idx] = temp_action[rh_forearm_tx_idx]
         
         print(f"Timestep {count}:")
         # spread_rew = env.task._bothoven_spread_from_key(env.physics)
-        # fingering_rew = env.task._bothoven_compute_fingering_reward(env.physics)
+        fingering_rew = env.task._bothoven_compute_fingering_reward(env.physics)
         # energy_rew = env.task._compute_energy_reward(env.physics)
         # print(f"Spread Rew: {spread_rew}")
-        # print(f"Fingering Rew: {fingering_rew}")
+        print(f"Fingering Rew: {fingering_rew}")
         # print(f"Energy Rew: {energy_rew}")
         print()
     count += 1

@@ -5,16 +5,16 @@
   <option impratio="10"/>
 
   <default>
-    <joint damping="0.5" frictionloss="0.01" armature="0.0002"/>
+    <joint damping="0.5" frictionloss="0.01" armature="0.0001"/>
 
     <default class="servo">
-      <position kp="3" ctrlrange="-0.0872665 0.0872665" forcerange="-5 5"/>
+      <position kp="5" ctrlrange="-0.0872665 0.0872665" forcerange="-5 5"/>
     </default>
     
     <default class="solenoid">
-      <joint damping="0.1"/>
       <!-- <position kp="3" ctrlrange="-0.523599 0" forcerange="-5 5"/> -->
-      <position kp="50" ctrlrange="0 0.523599" forcerange="-50 50"/>
+      <!-- <position kp="10" ctrlrange="0 0.523599" forcerange="-10 10"/> -->
+      <position kp="10" ctrlrange="0 0.4" forcerange="-10 10"/>
       <!-- <position kp="5" ctrlrange="-0.4 0" forcerange="-5 5"/> -->
     </default>
     
@@ -50,56 +50,56 @@
       <geom pos="0.0459382 -0.0813465 0.0782" quat="0 0 1 0" type="mesh" rgba="0.301961 0.313726 0.8 1" mesh="servo"/>
       <body name="large_finger_solenoid_1" pos="0.0353238 0.0750035 0.005" quat="0 0.707107 -0.707107 0">
         <inertial pos="1.7277e-08 0.0235491 -0.0213262" quat="0.706216 0.707996 4.01295e-06 -3.36093e-07" mass="0.553386" diaginertia="0.000162875 0.000146852 7.46131e-05"/>
-        <joint name="Finger_Mount1" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" actuatorfrcrange="-1 1"/>
+        <joint name="Finger_Mount1" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" />
         <geom pos="0 0.0273591 -0.036" quat="1 0 0 0" type="mesh" material="metallic" mesh="large_solenoid"/>
         <geom pos="0 0.007493 0" quat="0 1 0 0" type="mesh" material="black" mesh="large_finger_solenoid"/>
         <body name="finger_arm_large_1" pos="0.003 -0.029898 -0.046304" quat="0.5 -0.5 0.5 -0.5">
           <inertial pos="0.0513272 -0.00213016 -0.00250002" quat="0.0242961 0.706689 -0.0242961 0.706689" mass="0.00797272" diaginertia="1.16167e-05 1.11055e-05 5.43165e-07"/>
-          <joint name="Finger_Arm1" pos="0 0 0" axis="0 0 -1" range="0 0.523599" actuatorfrcrange="-1 1"/>
+          <joint name="Finger_Arm1" pos="0 0 0" axis="0 0 -1" range="0 0.523599" />
           <geom pos="0.0633683 -5.47873e-05 -0.005" quat="1 0 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="finger_arm_large"/>
         </body>
       </body>
       <body name="large_finger_solenoid_2" pos="0.0353238 0.0375035 0.005" quat="0 0.707107 -0.707107 0">
         <inertial pos="1.7277e-08 0.0235491 -0.0213262" quat="0.706216 0.707996 4.01295e-06 -3.36093e-07" mass="0.553386" diaginertia="0.000162875 0.000146852 7.46131e-05"/>
-        <joint name="Finger_Mount2" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" actuatorfrcrange="-1 1"/>
+        <joint name="Finger_Mount2" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" />
         <geom pos="0 0.0273591 -0.036" quat="1 0 0 0" type="mesh" material="metallic" mesh="large_solenoid"/>
         <geom pos="0 0.007493 0" quat="0 1 0 0" type="mesh" material="black" mesh="large_finger_solenoid"/>
         <body name="finger_arm_large_2" pos="0.003 -0.029898 -0.046304" quat="0.5 -0.5 0.5 -0.5">
           <inertial pos="0.0513272 -0.00213016 -0.00250002" quat="0.0242961 0.706689 -0.0242961 0.706689" mass="0.00797272" diaginertia="1.16167e-05 1.11055e-05 5.43165e-07"/>
-          <joint name="Finger_Arm2" pos="0 0 0" axis="0 0 -1" range="0 0.523599" actuatorfrcrange="-1 1"/>
+          <joint name="Finger_Arm2" pos="0 0 0" axis="0 0 -1" range="0 0.523599" />
           <geom pos="0.0633683 -5.47873e-05 -0.005" quat="1 0 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="finger_arm_large"/>
         </body>
       </body>
       <body name="large_finger_solenoid_3" pos="0.0353238 3.51764e-06 0.005" quat="0 0.707107 -0.707107 0">
         <inertial pos="1.7277e-08 0.0235491 -0.0213262" quat="0.706216 0.707996 4.01295e-06 -3.36093e-07" mass="0.553386" diaginertia="0.000162875 0.000146852 7.46131e-05"/>
-        <joint name="Finger_Mount3" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" actuatorfrcrange="-1 1"/>
+        <joint name="Finger_Mount3" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" />
         <geom pos="0 0.0273591 -0.036" quat="1 0 0 0" type="mesh" material="metallic" mesh="large_solenoid"/>
         <geom pos="0 0.007493 0" quat="0 1 0 0" type="mesh" material="black" mesh="large_finger_solenoid"/>
         <body name="finger_arm_large_3" pos="0.003 -0.029898 -0.046304" quat="0.5 -0.5 0.5 -0.5">
           <inertial pos="0.0513272 -0.00213016 -0.00250002" quat="0.0242961 0.706689 -0.0242961 0.706689" mass="0.00797272" diaginertia="1.16167e-05 1.11055e-05 5.43165e-07"/>
-          <joint name="Finger_Arm3" pos="0 0 0" axis="0 0 -1" range="0 0.523599" actuatorfrcrange="-1 1"/>
+          <joint name="Finger_Arm3" pos="0 0 0" axis="0 0 -1" range="0 0.523599" />
           <geom pos="0.0633683 -5.47873e-05 -0.005" quat="1 0 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="finger_arm_large"/>
         </body>
       </body>
       <body name="large_finger_solenoid_4" pos="0.0353238 -0.0374965 0.005" quat="0 0.707107 -0.707107 0">
         <inertial pos="1.7277e-08 0.0235491 -0.0213262" quat="0.706216 0.707996 4.01295e-06 -3.36093e-07" mass="0.553386" diaginertia="0.000162875 0.000146852 7.46131e-05"/>
-        <joint name="Finger_Mount4" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" actuatorfrcrange="-1 1"/>
+        <joint name="Finger_Mount4" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" />
         <geom pos="0 0.0273591 -0.036" quat="1 0 0 0" type="mesh" material="metallic" mesh="large_solenoid"/>
         <geom pos="0 0.007493 0" quat="0 1 0 0" type="mesh" material="black" mesh="large_finger_solenoid"/>
         <body name="finger_arm_large_4" pos="0.003 -0.029898 -0.046304" quat="0.5 -0.5 0.5 -0.5">
           <inertial pos="0.0513272 -0.00213016 -0.00250002" quat="0.0242961 0.706689 -0.0242961 0.706689" mass="0.00797272" diaginertia="1.16167e-05 1.11055e-05 5.43165e-07"/>
-          <joint name="Finger_Arm4" pos="0 0 0" axis="0 0 -1" range="0 0.523599" actuatorfrcrange="-1 1"/>
+          <joint name="Finger_Arm4" pos="0 0 0" axis="0 0 -1" range="0 0.523599" />
           <geom pos="0.0633683 -5.47873e-05 -0.005" quat="1 0 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="finger_arm_large"/>
         </body>
       </body>
       <body name="large_finger_solenoid_5" pos="0.0353238 -0.0749965 0.005" quat="0 0.707107 -0.707107 0">
         <inertial pos="1.7277e-08 0.0235491 -0.0213262" quat="0.706216 0.707996 4.01295e-06 -3.36093e-07" mass="0.553386" diaginertia="0.000162875 0.000146852 7.46131e-05"/>
-        <joint name="Finger_Mount5" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" actuatorfrcrange="-1 1"/>
+        <joint name="Finger_Mount5" pos="0 0 0" axis="0 0 1" range="-0.0872665 0.0872665" />
         <geom pos="0 0.0273591 -0.036" quat="1 0 0 0" type="mesh" material="metallic" mesh="large_solenoid"/>
         <geom pos="0 0.007493 0" quat="0 1 0 0" type="mesh" material="black" mesh="large_finger_solenoid"/>
         <body name="finger_arm_large_5" pos="0.003 -0.029898 -0.046304" quat="0.5 -0.5 0.5 -0.5">
           <inertial pos="0.0513272 -0.00213016 -0.00250002" quat="0.0242961 0.706689 -0.0242961 0.706689" mass="0.00797272" diaginertia="1.16167e-05 1.11055e-05 5.43165e-07"/>
-          <joint name="Finger_Arm5" pos="0 0 0" axis="0 0 -1" range="0 0.523599" actuatorfrcrange="-1 1"/>
+          <joint name="Finger_Arm5" pos="0 0 0" axis="0 0 -1" range="0 0.523599" />
           <geom pos="0.0633683 -5.47873e-05 -0.005" quat="1 0 0 0" type="mesh" rgba="0.972549 0.529412 0.00392157 1" mesh="finger_arm_large"/>
         </body>
       </body>

@@ -84,7 +84,7 @@ def random_policy(time_step):
         first_go = False
         return prev_action
 
-    if count % 150 == 0:
+    if count % 1 == 0:
         # prev_action = np.random.uniform(low=-1.0,
         #                         high=1.0,
         #                         size=action_spec.shape)
@@ -93,19 +93,19 @@ def random_policy(time_step):
         # prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
         # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
         # prev_action[lh_forearm_tx_idx] = 0 # lh forearms
-        prev_action = np.zeros(action_spec.shape)
-        prev_action[up_down_idxs] = -1
-        prev_action[up_down_idxs[0]] = 1
-        print(prev_action)
-        prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
-        prev_action[rh_forearm_tx_idx] = 0 # rh forearms
+        # prev_action = np.zeros(action_spec.shape)
+        # prev_action[up_down_idxs] = -1
+        # prev_action[up_down_idxs[0]] = 1
+        # print(prev_action)
+        # prev_action = scale_action_vector(prev_action, action_spec.minimum, action_spec.maximum)
+        # prev_action[rh_forearm_tx_idx] = 0 # rh forearms
 
         print(f"Timestep {count}:")
         # spread_rew = env.task._bothoven_spread_from_key(env.physics)
-        # fingering_rew = env.task._bothoven_compute_fingering_reward(env.physics)
+        fingering_rew = env.task._bothoven_compute_fingering_reward(env.physics)
         # energy_rew = env.task._compute_energy_reward(env.physics)
         # print(f"Spread Rew: {spread_rew}")
-        # print(f"Fingering Rew: {fingering_rew}")
+        print(f"Fingering Rew: {fingering_rew}")
         # print(f"Energy Rew: {energy_rew}")
         # print()
     count += 1
