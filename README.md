@@ -4,22 +4,22 @@ This repository contains software for the MuJoCo-based physics simulation where 
 
 ![Final Simulation](./final_sim_front.jpg)
 
-### Install from source
+### Installation
 
-Start by cloning the repository:
+Clone the repository:
 
 ```bash
 git clone https://github.com/alessandropotenza/bothoven-sim.git && cd bothoven-sim
 ```
 
-Next, install the prerequisite dependencies:
+Install the prerequisite dependencies:
 
 ```bash
 git submodule init && git submodule update
 bash scripts/install_deps.sh
 ```
 
-Finally, create a new conda environment and install in editable mode:
+Create a new conda environment and install the package in editable mode:
 
 ```bash
 conda create -n bothoven python=3.10
