@@ -19,7 +19,7 @@ git submodule init && git submodule update
 bash scripts/install_deps.sh
 ```
 
-Finally, create a new conda environment and install RoboPianist in editable mode:
+Finally, create a new conda environment and install in editable mode:
 
 ```bash
 conda create -n bothoven python=3.10
